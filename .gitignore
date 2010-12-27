@@ -1,0 +1,4 @@
+*.o
+physlock
+cscope.out
+tags
