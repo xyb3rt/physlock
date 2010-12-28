@@ -16,10 +16,10 @@ vt_t vt;
 void cleanup(int warn) {
 	if (reset_vt(&vt) < 0 && warn)
 		WARN("could not reset console mode");
-	
+
 	if (unlock_vt_switch() < 0 && warn)
 		WARN("could not enable console switching");
-	
+
 	if (release_vt(&vt, oldvt) < 0 && warn)
 		WARN("could not release console");
 
@@ -29,7 +29,7 @@ void cleanup(int warn) {
 }
 
 int main(int argc, const char **argv) {
-	int auth = 0, len;
+	int auth = 0, len, chpid;
 	char *as, c, passwd[PASSWD_LEN];
 
 	oldvt = vt.nr = vt.fd = -1;
@@ -40,16 +40,16 @@ int main(int argc, const char **argv) {
 
 	if (get_current_vt(&oldvt, &username) < 0)
 		FATAL("could not get console state");
-	
+
 	if (acquire_new_vt(&vt) < 0)
 		FATAL("could not aquire new console");
-	
+
 	if (lock_vt_switch() < 0)
 		FATAL("could not lock console switching");
-	
+
 	if (secure_vt(&vt) < 0)
 		FATAL("could not secure console");
-	
+
 	while (!auth) {
 		as = username;
 		if (strcmp(username, "root") != 0) {

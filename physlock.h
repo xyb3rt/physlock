@@ -1,6 +1,8 @@
 #ifndef PHYSLOCK_H
 #define PHYSLOCK_H
 
+#define VERSION "git-20101228"
+
 #define CONSOLE_DEV "/dev/console"
 
 #define WARN(msg)                                                      \
