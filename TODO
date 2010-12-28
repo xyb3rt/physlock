@@ -1,2 +1,3 @@
+- regard username argument
 - signal-handler
 - temporarily disable sysrq

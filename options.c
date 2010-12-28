@@ -6,24 +6,25 @@
 #include "options.h"
 
 void print_usage() {
-	printf("usage: physlock [-fhsv] [-u user]\n");
+	printf("usage: physlock [-fhLlv]\n");
 }
 
 void print_version() {
 	printf("physlock - lock all consoles\n");
-	printf("version %s\n", VERSION);
+	printf("Version %s, written by Bert Muennich\n", VERSION);
 }
 
-int parse_arguments(int argc, char **argv, options_t *options) {
+int parse_options(int argc, char **argv, options_t *options) {
 	int opt;
 	
 	options->fg = 0;
 	options->help = 0;
-	options->unlock = 0;
+	options->o_lock = 0;
+	options->o_unlock = 0;
 	options->user = NULL;
 	options->version = 0;
 
-	while ((opt = getopt(argc, argv, "fhsu:v")) != -1) {
+	while ((opt = getopt(argc, argv, "fhLlv")) != -1) {
 		switch (opt) {
 			case 'f':
 				options->fg = 1;
@@ -31,8 +32,11 @@ int parse_arguments(int argc, char **argv, options_t *options) {
 			case 'h':
 				options->help = 1;
 				break;
-			case 's':
-				options->unlock = 1;
+			case 'L':
+				options->o_unlock = 1;
+				break;
+			case 'l':
+				options->o_lock = 1;
 				break;
 			case 'u':
 				options->user = optarg;

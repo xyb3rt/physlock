@@ -4,7 +4,8 @@
 typedef struct options_s {
 	int fg;
 	int help;
-	int unlock;
+	int o_lock;
+	int o_unlock;
 	const char *user;
 	int version;
 } options_t;
@@ -12,6 +13,6 @@ typedef struct options_s {
 void print_usage();
 void print_version();
 
-int parse_arguments(int, char**, options_t*);
+int parse_options(int, char**, options_t*);
 
 #endif /* OPTIONS_H */

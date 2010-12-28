@@ -5,6 +5,7 @@
 
 #include "physlock.h"
 #include "auth.h"
+#include "options.h"
 #include "vt.h"
 
 #define PASSWD_LEN 1024
@@ -28,15 +29,38 @@ void cleanup(int warn) {
 	free(username);
 }
 
-int main(int argc, const char **argv) {
+int main(int argc, char **argv) {
 	int auth = 0, len, chpid;
 	char *as, c, passwd[PASSWD_LEN];
+	options_t options;
 
 	oldvt = vt.nr = vt.fd = -1;
 	vt.ios = NULL;
 
+	parse_options(argc, argv, &options);
+
+	if (options.help) {
+		print_usage();
+		return 0;
+	} else if (options.version) {
+		print_version();
+		return 0;
+	}
+
 	if (vt_init() < 0)
 		FATAL("could not open console device");
+	
+	if (options.o_lock) {
+		if (lock_vt_switch() < 0)
+			FATAL("could not lock console switching");
+		vt_destroy();
+		return 0;
+	} else if (options.o_unlock) {
+		if (unlock_vt_switch() < 0)
+			WARN("could not enable console switching");
+		vt_destroy();
+		return 0;
+	}
 
 	if (get_current_vt(&oldvt, &username) < 0)
 		FATAL("could not get console state");
@@ -49,6 +73,14 @@ int main(int argc, const char **argv) {
 
 	if (secure_vt(&vt) < 0)
 		FATAL("could not secure console");
+
+	if (!options.fg) {
+		chpid = fork();
+		if (chpid < 0)
+			FATAL("could not spawn background process");
+		else if (chpid > 0)
+			return 0;
+	}
 
 	while (!auth) {
 		as = username;
