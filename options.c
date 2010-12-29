@@ -6,7 +6,7 @@
 #include <unistd.h>
 
 void print_usage() {
-	printf("usage: physlock [-fhLlv] [-u user]\n");
+	printf("usage: physlock [-dhLlv] [-u user]\n");
 }
 
 void print_version() {
@@ -17,17 +17,17 @@ void print_version() {
 int parse_options(int argc, char **argv, options_t *options) {
 	int opt;
 	
-	options->fg = 0;
+	options->bg = 0;
 	options->help = 0;
 	options->only_lock = 0;
 	options->only_unlock = 0;
 	options->user = NULL;
 	options->version = 0;
 
-	while ((opt = getopt(argc, argv, "fhLlu:v")) != -1) {
+	while ((opt = getopt(argc, argv, "dhLlu:v")) != -1) {
 		switch (opt) {
-			case 'f':
-				options->fg = 1;
+			case 'd':
+				options->bg = 1;
 				break;
 			case 'h':
 				options->help = 1;

@@ -58,15 +58,17 @@ int main(int argc, char **argv) {
 		get_pwhash(&user);
 
 	acquire_new_vt(&vt);
-	lock_vt_switch();
+	/*lock_vt_switch();*/
 	secure_vt(&vt);
 
-	if (!options.fg) {
+	if (options.bg) {
 		chpid = fork();
 		if (chpid < 0)
 			FATAL("could not spawn background process");
 		else if (chpid > 0)
 			return 0;
+		else
+			setsid();
 	}
 
 	while (!auth) {

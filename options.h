@@ -2,7 +2,7 @@
 #define OPTIONS_H
 
 typedef struct options_s {
-	int fg;
+	int bg;
 	int help;
 	int only_lock;
 	int only_unlock;
