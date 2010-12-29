@@ -4,8 +4,8 @@
 typedef struct options_s {
 	int fg;
 	int help;
-	int o_lock;
-	int o_unlock;
+	int only_lock;
+	int only_unlock;
 	const char *user;
 	int version;
 } options_t;

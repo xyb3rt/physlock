@@ -1,32 +1,40 @@
-#define _XOPEN_SOURCE
+#include "physlock.h"
+#include "auth.h"
 
 #include <string.h>
 #include <shadow.h>
 #include <unistd.h>
 
-#include "physlock.h"
-#include "auth.h"
-
-int authenticate(const char *username, const char *pw) {
-	int ret;
+void get_pwhash(userinfo_t *uinfo) {
 	struct spwd *spw;
-	char *cryptpw;
+
+	if (uinfo == NULL || uinfo->name == NULL)
+		return;
 
 	setspent();
 
-	spw = getspnam(username);
+	spw = getspnam(uinfo->name);
 	if (spw == NULL)
-		return -1;
-	cryptpw = crypt(pw, spw->sp_pwdp);
-	if (cryptpw == NULL)
-		return -1;
+		FATAL("could not get password for user %s", uinfo->name);
 
-	if (strcmp(cryptpw, spw->sp_pwdp) == 0)
-		ret = 1;
-	else
-		ret = 0;
-	
+	uinfo->pwhash = strdup(spw->sp_pwdp);
+	if (uinfo->pwhash == NULL)
+		FATAL("could not allocate memory");
+
 	endspent();
+}
 
-	return ret;
+int authenticate(const userinfo_t *uinfo, const char *pw) {
+	char *cryptpw;
+
+	if (uinfo == NULL || uinfo->pwhash == NULL || pw == NULL) {
+		WARN("authenticate() called with invalid argument");
+		return 0;
+	}
+
+	cryptpw = crypt(pw, uinfo->pwhash);
+	if (cryptpw == NULL)
+		FATAL("could not hash password of user %s", uinfo->name);
+
+	return strcmp(cryptpw, uinfo->pwhash) == 0;
 }

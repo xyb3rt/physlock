@@ -1,3 +1,2 @@
-- read user db once at startup
 - signal-handler
 - temporarily disable sysrq

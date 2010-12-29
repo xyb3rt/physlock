@@ -2,7 +2,7 @@ all: physlock
 
 CC?=gcc
 PREFIX?=/usr/local
-CFLAGS+= -Wall -pedantic
+CFLAGS+= -std=c99 -Wall -pedantic -g
 LDFLAGS+= 
 LIBS+= -lcrypt
 

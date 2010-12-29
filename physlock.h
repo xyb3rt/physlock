@@ -1,24 +1,34 @@
 #ifndef PHYSLOCK_H
 #define PHYSLOCK_H
 
-#define VERSION "git-20101228"
+#if __STDC_VERSION__ >= 199901L
+#define _XOPEN_SOURCE 600
+#else
+#define _XOPEN_SOURCE 500
+#endif
+
+#include <stdlib.h>
+#include <stdio.h>
+
+#define VERSION "git-20101229"
 
 #define CONSOLE_DEV "/dev/console"
 
-#define WARN(msg)                                                      \
+#define WARN(...)                                                      \
 	do {                                                                 \
-		fprintf(stderr, "physlock: %s:%d: warning: ", __FILE__, __LINE__); \
-		perror(msg);                                                       \
+	  fprintf(stderr, "physlock: %s:%d: warning: ", __FILE__, __LINE__); \
+		fprintf(stderr, __VA_ARGS__);                                      \
+		fprintf(stderr, "\n");                                             \
 	} while (0)
 
-#define FATAL(msg)                                                     \
+#define FATAL(...)                                                     \
   do {                                                                 \
 		fprintf(stderr, "physlock: %s:%d: error: ", __FILE__, __LINE__);   \
-		perror(msg);                                                       \
-		cleanup(0);                                                        \
-		exit(1);                                                           \
+		fprintf(stderr, __VA_ARGS__);                                      \
+		fprintf(stderr, "\n");                                             \
+		clean_exit(1);                                                     \
 	} while (0)
 
-void cleanup(int warn);
+void clean_exit(int);
 
 #endif /* PHYSLOCK_H */

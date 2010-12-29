@@ -1,7 +1,6 @@
 #ifndef VT_H
 #define VT_H
 
-#include <stdio.h>
 #include <termios.h>
 
 typedef struct vt_s {
@@ -12,19 +11,19 @@ typedef struct vt_s {
 	tcflag_t rlflag;
 } vt_t;
 
-int vt_init();
+void vt_init();
 void vt_destroy();
 
-int get_current_vt(int*, const char**);
-int acquire_new_vt(vt_t*);
-int release_vt(vt_t*, int);
+void get_current_vt(int*, const char**);
+void acquire_new_vt(vt_t*);
+void release_vt(vt_t*, int);
 
-int lock_vt_switch();
-int unlock_vt_switch();
+void lock_vt_switch();
+void unlock_vt_switch();
 
-int secure_vt(vt_t*);
-int tty_break_on(vt_t*);
-int tty_break_off(vt_t*);
-int reset_vt(vt_t*);
+void secure_vt(vt_t*);
+void tty_break_on(vt_t*);
+void tty_break_off(vt_t*);
+void reset_vt(vt_t*);
 
 #endif /* VT_H */

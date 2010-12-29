@@ -1,12 +1,10 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <unistd.h>
-
 #include "physlock.h"
 #include "auth.h"
 #include "options.h"
 #include "vt.h"
+
+#include <string.h>
+#include <unistd.h>
 
 #define PASSWD_LEN 1024
 
@@ -14,13 +12,15 @@ int oldvt;
 vt_t vt;
 
 int main(int argc, char **argv) {
-	int auth = 0, len, chpid;
+	int only_root, auth = 0, len, chpid;
 	char c, passwd[PASSWD_LEN];
-	const char *as, *username, **uptr;
+	const char **uptr;
+	userinfo_t *as, root, user;
 	options_t options;
 
 	oldvt = vt.nr = vt.fd = -1;
 	vt.ios = NULL;
+	root.name = "root";
 
 	parse_options(argc, argv, &options);
 
@@ -30,41 +30,36 @@ int main(int argc, char **argv) {
 	} else if (options.version) {
 		print_version();
 		return 0;
+	} else if (options.only_lock) {
+		vt_init();
+		lock_vt_switch();
+		vt_destroy();
+		return 0;
+	} else if (options.only_unlock) {
+		vt_init();
+		unlock_vt_switch();
+		vt_destroy();
+		return 0;
 	}
 
 	if (options.user != NULL) {
 		uptr = NULL;
-		username = options.user;
+		user.name = options.user;
 	} else {
-		uptr = &username;
+		uptr = &user.name;
 	}
 
-	if (vt_init() < 0)
-		FATAL("could not open console device");
-	
-	if (options.o_lock) {
-		if (lock_vt_switch() < 0)
-			FATAL("could not lock console switching");
-		vt_destroy();
-		return 0;
-	} else if (options.o_unlock) {
-		if (unlock_vt_switch() < 0)
-			WARN("could not enable console switching");
-		vt_destroy();
-		return 0;
-	}
+	vt_init();
+	get_current_vt(&oldvt, uptr);
 
-	if (get_current_vt(&oldvt, uptr) < 0)
-		FATAL("could not get console state");
+	get_pwhash(&root);
+	only_root = strcmp(user.name, "root") == 0;
+	if (!only_root)
+		get_pwhash(&user);
 
-	if (acquire_new_vt(&vt) < 0)
-		FATAL("could not aquire new console");
-
-	if (lock_vt_switch() < 0)
-		FATAL("could not lock console switching");
-
-	if (secure_vt(&vt) < 0)
-		FATAL("could not secure console");
+	acquire_new_vt(&vt);
+	lock_vt_switch();
+	secure_vt(&vt);
 
 	if (!options.fg) {
 		chpid = fork();
@@ -75,16 +70,16 @@ int main(int argc, char **argv) {
 	}
 
 	while (!auth) {
-		as = username;
-		if (strcmp(username, "root") != 0) {
+		as = &user;
+		if (!only_root) {
 			tty_break_on(&vt);
 			fprintf(vt.ios,
 					"\nPress [R] to unlock as root or [U] to unlock as %s.\n",
-					username);
+					user.name);
 			while (1) {
 				c = fgetc(vt.ios);
 				if (c == 'R' || c == 'r') {
-					as = "root";
+					as = &root;
 					break;
 				} else if (c == 'U' || c == 'u') {
 					break;
@@ -96,35 +91,34 @@ int main(int argc, char **argv) {
 			fgetc(vt.ios);
 		}
 
-		fprintf(vt.ios, "%s's password:", as);
+		fprintf(vt.ios, "%s's password:", as->name);
 		fgets(passwd, PASSWD_LEN, vt.ios);
 		len = strlen(passwd);
 		if (len > 0 && passwd[len-1] == '\n')
 			passwd[len-1] = '\0';
 
 		auth = authenticate(as, passwd);
-		if (auth < 0) {
-			FATAL("could not read user db");
-		} else if (!auth) {
+		if (!auth) {
 			fprintf(vt.ios, "\nAuthentication failed\n");
 			sleep(1);
 		}
 	}
 
-	cleanup(1);
+	clean_exit(0);
 
 	return 0;
 }
 
-void cleanup(int warn) {
-	if (reset_vt(&vt) < 0 && warn)
-		WARN("could not reset console mode");
+void clean_exit(int err) {
+	static int in = 0;
 
-	if (unlock_vt_switch() < 0 && warn)
-		WARN("could not enable console switching");
+	if (!in++) {
+		if (vt.fd >= 0)
+			reset_vt(&vt);
+		unlock_vt_switch();
+		release_vt(&vt, oldvt);
+		vt_destroy();
+	}
 
-	if (release_vt(&vt, oldvt) < 0 && warn)
-		WARN("could not release console");
-
-	vt_destroy();
+	exit(err);
 }
