@@ -11,27 +11,12 @@
 #define PASSWD_LEN 1024
 
 int oldvt;
-char *username;
 vt_t vt;
-
-void cleanup(int warn) {
-	if (reset_vt(&vt) < 0 && warn)
-		WARN("could not reset console mode");
-
-	if (unlock_vt_switch() < 0 && warn)
-		WARN("could not enable console switching");
-
-	if (release_vt(&vt, oldvt) < 0 && warn)
-		WARN("could not release console");
-
-	vt_destroy();
-
-	free(username);
-}
 
 int main(int argc, char **argv) {
 	int auth = 0, len, chpid;
-	char *as, c, passwd[PASSWD_LEN];
+	char c, passwd[PASSWD_LEN];
+	const char *as, *username, **uptr;
 	options_t options;
 
 	oldvt = vt.nr = vt.fd = -1;
@@ -45,6 +30,13 @@ int main(int argc, char **argv) {
 	} else if (options.version) {
 		print_version();
 		return 0;
+	}
+
+	if (options.user != NULL) {
+		uptr = NULL;
+		username = options.user;
+	} else {
+		uptr = &username;
 	}
 
 	if (vt_init() < 0)
@@ -62,7 +54,7 @@ int main(int argc, char **argv) {
 		return 0;
 	}
 
-	if (get_current_vt(&oldvt, &username) < 0)
+	if (get_current_vt(&oldvt, uptr) < 0)
 		FATAL("could not get console state");
 
 	if (acquire_new_vt(&vt) < 0)
@@ -122,4 +114,17 @@ int main(int argc, char **argv) {
 	cleanup(1);
 
 	return 0;
+}
+
+void cleanup(int warn) {
+	if (reset_vt(&vt) < 0 && warn)
+		WARN("could not reset console mode");
+
+	if (unlock_vt_switch() < 0 && warn)
+		WARN("could not enable console switching");
+
+	if (release_vt(&vt, oldvt) < 0 && warn)
+		WARN("could not release console");
+
+	vt_destroy();
 }

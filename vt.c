@@ -31,7 +31,7 @@ void vt_destroy() {
 	}
 }
 
-int get_current_vt(int *nr, char **user) {
+int get_current_vt(int *nr, const char **user) {
 	struct stat fstat;
 	struct vt_stat vtstat;
 	struct passwd *userinfo;
@@ -44,16 +44,18 @@ int get_current_vt(int *nr, char **user) {
 		return err;
 	*nr = vtstat.v_active;
 
-	snprintf(filename, FNAME_LEN, "/dev/tty%d", *nr);
-	err = stat(filename, &fstat);
-	if (err < 0)
-		return err;
-	userinfo = getpwuid(fstat.st_uid);
-	if (userinfo == NULL)
-		return -1;
-	*user = strdup(userinfo->pw_name);
-	if (*user == NULL)
-		return -1;
+	if (user != NULL) {
+		snprintf(filename, FNAME_LEN, "/dev/tty%d", *nr);
+		err = stat(filename, &fstat);
+		if (err < 0)
+			return err;
+		userinfo = getpwuid(fstat.st_uid);
+		if (userinfo == NULL)
+			return -1;
+		*user = strdup(userinfo->pw_name);
+		if (*user == NULL)
+			return -1;
+	}
 
 	return 0;
 }

@@ -6,7 +6,7 @@
 #include "options.h"
 
 void print_usage() {
-	printf("usage: physlock [-fhLlv]\n");
+	printf("usage: physlock [-fhLlv] [-u user]\n");
 }
 
 void print_version() {
@@ -24,7 +24,7 @@ int parse_options(int argc, char **argv, options_t *options) {
 	options->user = NULL;
 	options->version = 0;
 
-	while ((opt = getopt(argc, argv, "fhLlv")) != -1) {
+	while ((opt = getopt(argc, argv, "fhLlu:v")) != -1) {
 		switch (opt) {
 			case 'f':
 				options->fg = 1;

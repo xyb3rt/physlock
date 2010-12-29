@@ -15,7 +15,7 @@ typedef struct vt_s {
 int vt_init();
 void vt_destroy();
 
-int get_current_vt(int*, char**);
+int get_current_vt(int*, const char**);
 int acquire_new_vt(vt_t*);
 int release_vt(vt_t*, int);
 
