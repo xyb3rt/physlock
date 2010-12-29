@@ -70,7 +70,7 @@ int main(int argc, char **argv) {
 	}
 
 	while (!auth) {
-		as = &user;
+		as = &root;
 		if (!only_root) {
 			tty_break_on(&vt);
 			fprintf(vt.ios,
@@ -79,9 +79,9 @@ int main(int argc, char **argv) {
 			while (1) {
 				c = fgetc(vt.ios);
 				if (c == 'R' || c == 'r') {
-					as = &root;
 					break;
 				} else if (c == 'U' || c == 'u') {
+					as = &user;
 					break;
 				}
 			}
