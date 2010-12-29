@@ -17,7 +17,7 @@ void print_version() {
 int parse_options(int argc, char **argv, options_t *options) {
 	int opt;
 	
-	options->bg = 0;
+	options->detach = 0;
 	options->help = 0;
 	options->only_lock = 0;
 	options->only_unlock = 0;
@@ -27,7 +27,7 @@ int parse_options(int argc, char **argv, options_t *options) {
 	while ((opt = getopt(argc, argv, "dhLlu:v")) != -1) {
 		switch (opt) {
 			case 'd':
-				options->bg = 1;
+				options->detach = 1;
 				break;
 			case 'h':
 				options->help = 1;

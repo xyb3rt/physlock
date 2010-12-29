@@ -61,7 +61,7 @@ int main(int argc, char **argv) {
 	lock_vt_switch();
 	secure_vt(&vt);
 
-	if (options.bg) {
+	if (options.detach) {
 		chpid = fork();
 		if (chpid < 0)
 			FATAL("could not spawn background process");
