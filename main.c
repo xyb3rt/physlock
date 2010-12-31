@@ -86,6 +86,8 @@ int main(int argc, char **argv) {
 					as = &user;
 					break;
 				}
+				if (ferror(vt.ios))
+					FATAL("could not read from console");
 			}
 			tty_break_off(&vt);
 		} else {
@@ -98,6 +100,9 @@ int main(int argc, char **argv) {
 		len = strlen(passwd);
 		if (len > 0 && passwd[len-1] == '\n')
 			passwd[len-1] = '\0';
+
+		if (ferror(vt.ios))
+			FATAL("could not read from console");
 
 		auth = authenticate(as, passwd);
 		if (!auth) {
