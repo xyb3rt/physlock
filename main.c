@@ -111,12 +111,12 @@ int main(int argc, char **argv) {
 		}
 	}
 
-	clean_exit(0);
+	cleanup();
 
 	return 0;
 }
 
-void clean_exit(int err) {
+void cleanup() {
 	static int in = 0;
 
 	if (!in++) {
@@ -126,6 +126,4 @@ void clean_exit(int err) {
 		release_vt(&vt, oldvt);
 		vt_destroy();
 	}
-
-	exit(err);
 }

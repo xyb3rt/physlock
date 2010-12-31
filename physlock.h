@@ -26,9 +26,10 @@
 		fprintf(stderr, "physlock: %s:%d: error: ", __FILE__, __LINE__);   \
 		fprintf(stderr, __VA_ARGS__);                                      \
 		fprintf(stderr, "\n");                                             \
-		clean_exit(1);                                                     \
+		cleanup();                                                         \
+		exit(1);                                                           \
 	} while (0)
 
-void clean_exit(int);
+void cleanup();
 
 #endif /* PHYSLOCK_H */
