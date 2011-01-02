@@ -125,7 +125,7 @@ int main(int argc, char **argv) {
 		auth = authenticate(as, passwd);
 		if (!auth) {
 			fprintf(vt.ios, "\nAuthentication failed\n");
-			sleep(1);
+			sleep(AUTH_FAIL_TIMEOUT);
 		}
 	}
 

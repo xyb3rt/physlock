@@ -28,9 +28,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#define VERSION "git-20101229"
+#include "config.h"
 
-#define CONSOLE_DEV "/dev/console"
+#define VERSION "git-20110102"
 
 #define WARN(...)                                                      \
 	do {                                                                 \

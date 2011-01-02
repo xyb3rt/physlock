@@ -34,9 +34,9 @@ int fd = -1;
 char filename[FNAME_LEN];
 
 void vt_init() {
-	fd = open(CONSOLE_DEV, O_RDWR);
+	fd = open(CONSOLE_DEVICE, O_RDWR);
 	if (fd < 0)
-		FATAL("could not open console device %s", CONSOLE_DEV);
+		FATAL("could not open console device %s", CONSOLE_DEVICE);
 }
 
 void vt_destroy() {
@@ -59,7 +59,7 @@ void get_current_vt(int *nr, const char **user) {
 	*nr = vtstat.v_active;
 
 	if (user != NULL) {
-		snprintf(filename, FNAME_LEN, "/dev/tty%d", *nr);
+		snprintf(filename, FNAME_LEN, TTY_DEVICE_BASE "%d", *nr);
 		if (stat(filename, &fstat) < 0)
 			FATAL("could not stat file %s", filename);
 		userinfo = getpwuid(fstat.st_uid);
@@ -84,7 +84,7 @@ void acquire_new_vt(vt_t *vt) {
 			ioctl(fd, VT_WAITACTIVE, vt->nr) < 0)
 		FATAL("could not activate console # %d", vt->nr);
 
-	snprintf(filename, FNAME_LEN, "/dev/tty%d", vt->nr);
+	snprintf(filename, FNAME_LEN, TTY_DEVICE_BASE "%d", vt->nr);
 	vt->ios = fopen(filename, "r+");
 	if (vt->ios == NULL)
 		FATAL("could not open file %s", filename);
