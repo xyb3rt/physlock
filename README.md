@@ -39,11 +39,10 @@ permissions of the foreground console device (/dev/ttyX).
 
 The following command-line arguments are supported:
 
-    -d   fork and detach, parent returns after everything is set up
-         (useful for suspend/hibernate scripts)
-    -h   print short usage help and exit
-    -l   only lock console switching
-    -L   only enable console switching
-    -v   print version information and exit
-    -u USER
-         allow the given user to unlock the computer
+    -d       fork and detach, parent returns after everything is set up
+             (useful for suspend/hibernate scripts)
+    -h       print short usage help and exit
+    -l       only lock console switching
+    -L       only enable console switching
+    -v       print version information and exit
+    -u USER  allow the given user to unlock the computer
