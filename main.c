@@ -40,7 +40,8 @@ int main(int argc, char **argv) {
 	vt.ios = NULL;
 	root.name = "root";
 
-	parse_options(argc, argv, &options);
+	if (parse_options(argc, argv, &options) < 0)
+		return 1;
 
 	if (options.help) {
 		print_usage();

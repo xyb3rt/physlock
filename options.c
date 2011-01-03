@@ -44,6 +44,8 @@ int parse_options(int argc, char **argv, options_t *options) {
 
 	while ((opt = getopt(argc, argv, "dhLlu:v")) != -1) {
 		switch (opt) {
+			case '?':
+				return -1;
 			case 'd':
 				options->detach = 1;
 				break;
