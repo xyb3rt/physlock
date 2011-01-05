@@ -30,7 +30,7 @@
 
 #include "config.h"
 
-#define VERSION "git-20110103"
+#define VERSION "git-20110105"
 
 #define WARN(...)                                                      \
 	do {                                                                 \

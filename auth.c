@@ -22,6 +22,7 @@
 #include <string.h>
 #include <shadow.h>
 #include <unistd.h>
+#include <errno.h>
 
 void get_pwhash(userinfo_t *uinfo) {
 	struct spwd *spw;
@@ -52,7 +53,8 @@ int authenticate(const userinfo_t *uinfo, const char *pw) {
 
 	cryptpw = crypt(pw, uinfo->pwhash);
 	if (cryptpw == NULL)
-		FATAL("could not hash password of user %s", uinfo->name);
+		FATAL("could not hash password of user %s: %s", uinfo->name,
+		      strerror(errno));
 
 	return strcmp(cryptpw, uinfo->pwhash) == 0;
 }

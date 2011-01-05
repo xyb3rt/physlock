@@ -23,6 +23,7 @@
 
 #include <string.h>
 #include <unistd.h>
+#include <errno.h>
 
 #define PASSWD_LEN 1024
 
@@ -88,7 +89,7 @@ int main(int argc, char **argv) {
 	if (options.detach) {
 		chpid = fork();
 		if (chpid < 0)
-			FATAL("could not spawn background process");
+			FATAL("could not spawn background process: %s", strerror(errno));
 		else if (chpid > 0)
 			return 0;
 		else
@@ -111,7 +112,7 @@ int main(int argc, char **argv) {
 					break;
 				}
 				if (ferror(vt.ios))
-					FATAL("could not read from console");
+					FATAL("could not read from console: %s", strerror(errno));
 			}
 			tty_break_off(&vt);
 		} else {
@@ -126,7 +127,7 @@ int main(int argc, char **argv) {
 			passwd[len-1] = '\0';
 
 		if (ferror(vt.ios))
-			FATAL("could not read from console");
+			FATAL("could not read from console: %s", strerror(errno));
 
 		auth = authenticate(as, passwd);
 		if (!auth) {
