@@ -43,6 +43,11 @@ int main(int argc, char **argv) {
 	if (parse_options(argc, argv, &options) < 0)
 		return 1;
 
+	if (geteuid() != 0) {
+		fprintf(stderr, "physlock: must be root!\n");
+		return 1;
+	}
+
 	if (options.help) {
 		print_usage();
 		return 0;
