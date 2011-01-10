@@ -34,8 +34,8 @@ Usage
 The behaviour of physlock is completely controlled via command-line arguments,
 it does not rely on environment variables.
 It always allows unlocking as root and as a specified user. If no username is
-given, physlock tries to guess the active user by looking at the file
-permissions of the foreground console device (/dev/ttyX).
+given, then physlock uses the file owner of the foreground console device
+(/dev/ttyX).
 
 The following command-line arguments are supported:
 
