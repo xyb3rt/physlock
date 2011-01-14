@@ -19,6 +19,7 @@
 #include "physlock.h"
 #include "auth.h"
 #include "options.h"
+#include "signals.h"
 #include "vt.h"
 
 #include <string.h>
@@ -73,6 +74,8 @@ int main(int argc, char **argv) {
 	} else {
 		uptr = &user.name;
 	}
+
+	signal_exit(SIGTERM);
 
 	vt_init();
 	get_current_vt(&oldvt, uptr);
