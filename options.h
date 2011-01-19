@@ -21,16 +21,16 @@
 
 typedef struct options_s {
 	int detach;
-	int help;
 	int only_lock;
 	int only_unlock;
 	const char *user;
-	int version;
 } options_t;
+
+extern const options_t *options;
 
 void print_usage();
 void print_version();
 
-int parse_options(int, char**, options_t*);
+void parse_options(int, char**);
 
 #endif /* OPTIONS_H */

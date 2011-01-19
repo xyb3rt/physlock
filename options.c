@@ -23,6 +23,9 @@
 #include <stdio.h>
 #include <unistd.h>
 
+options_t _options;
+const options_t *options = (const options_t*) &_options;
+
 void print_usage() {
 	printf("usage: physlock [-dhLlv] [-u user]\n");
 }
@@ -32,40 +35,37 @@ void print_version() {
 	printf("Version %s, written by Bert Muennich\n", VERSION);
 }
 
-int parse_options(int argc, char **argv, options_t *options) {
+void parse_options(int argc, char **argv) {
 	int opt;
 	
-	options->detach = 0;
-	options->help = 0;
-	options->only_lock = 0;
-	options->only_unlock = 0;
-	options->user = NULL;
-	options->version = 0;
+	_options.detach = 0;
+	_options.only_lock = 0;
+	_options.only_unlock = 0;
+	_options.user = NULL;
 
 	while ((opt = getopt(argc, argv, "dhLlu:v")) != -1) {
 		switch (opt) {
 			case '?':
-				return -1;
+				print_usage();
+				exit(1);
 			case 'd':
-				options->detach = 1;
+				_options.detach = 1;
 				break;
 			case 'h':
-				options->help = 1;
-				break;
+				print_usage();
+				exit(0);
 			case 'L':
-				options->only_unlock = 1;
+				_options.only_unlock = 1;
 				break;
 			case 'l':
-				options->only_lock = 1;
+				_options.only_lock = 1;
 				break;
 			case 'u':
-				options->user = optarg;
+				_options.user = optarg;
 				break;
 			case 'v':
-				options->version = 1;
-				break;
+				print_version();
+				exit(0);
 		}
 	}
-	
-	return 0;
 }

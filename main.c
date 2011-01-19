@@ -36,48 +36,39 @@ int main(int argc, char **argv) {
 	char c, passwd[PASSWD_LEN];
 	const char **uptr;
 	userinfo_t *as, root, user;
-	options_t options;
 
 	oldvt = vt.nr = vt.fd = -1;
 	vt.ios = NULL;
 	root.name = "root";
 
-	if (parse_options(argc, argv, &options) < 0)
-		return 1;
+	parse_options(argc, argv);
 
 	if (geteuid() != 0) {
 		fprintf(stderr, "physlock: must be root!\n");
 		return 1;
 	}
 
-	if (options.help) {
-		print_usage();
-		return 0;
-	} else if (options.version) {
-		print_version();
-		return 0;
-	} else if (options.only_lock) {
-		vt_init();
+	signal_exit(SIGTERM);
+
+	vt_init();
+
+	if (options->only_lock) {
 		lock_vt_switch();
 		vt_destroy();
 		return 0;
-	} else if (options.only_unlock) {
-		vt_init();
+	} else if (options->only_unlock) {
 		unlock_vt_switch();
 		vt_destroy();
 		return 0;
 	}
 
-	if (options.user != NULL) {
+	if (options->user != NULL) {
 		uptr = NULL;
-		user.name = options.user;
+		user.name = options->user;
 	} else {
 		uptr = &user.name;
 	}
 
-	signal_exit(SIGTERM);
-
-	vt_init();
 	get_current_vt(&oldvt, uptr);
 
 	get_pwhash(&root);
@@ -89,7 +80,7 @@ int main(int argc, char **argv) {
 	lock_vt_switch();
 	secure_vt(&vt);
 
-	if (options.detach) {
+	if (options->detach) {
 		chpid = fork();
 		if (chpid < 0)
 			FATAL("could not spawn background process: %s", strerror(errno));
