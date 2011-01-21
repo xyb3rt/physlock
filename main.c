@@ -49,6 +49,11 @@ int main(int argc, char **argv) {
 	}
 
 	signal_exit(SIGTERM);
+	signal_exit(SIGQUIT);
+	signal_ignore(SIGUSR1);
+	signal_ignore(SIGUSR2);
+	signal_ignore(SIGHUP);
+	signal_ignore(SIGINT);
 
 	vt_init();
 
@@ -77,7 +82,7 @@ int main(int argc, char **argv) {
 		get_pwhash(&user);
 
 	acquire_new_vt(&vt);
-	lock_vt_switch();
+	//lock_vt_switch();
 	secure_vt(&vt);
 
 	if (options->detach) {
