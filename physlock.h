@@ -30,8 +30,6 @@
 
 #include "config.h"
 
-#define VERSION "0.3"
-
 #define WARN(...)                                                      \
 	do {                                                                 \
 	  fprintf(stderr, "physlock: %s:%d: warning: ", __FILE__, __LINE__); \
