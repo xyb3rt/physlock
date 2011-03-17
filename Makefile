@@ -1,6 +1,6 @@
 all: physlock
 
-VERSION=git-20110123
+VERSION=git-20110317
 
 CC?=gcc
 PREFIX?=/usr/local

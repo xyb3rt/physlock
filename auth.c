@@ -34,11 +34,11 @@ void get_pwhash(userinfo_t *uinfo) {
 
 	spw = getspnam(uinfo->name);
 	if (spw == NULL)
-		FATAL("could not get password for user %s", uinfo->name);
+		DIE("could not get password for user %s", uinfo->name);
 
 	uinfo->pwhash = strdup(spw->sp_pwdp);
 	if (uinfo->pwhash == NULL)
-		FATAL("could not allocate memory");
+		DIE("could not allocate memory");
 
 	endspent();
 }
@@ -53,7 +53,7 @@ int authenticate(const userinfo_t *uinfo, const char *pw) {
 
 	cryptpw = crypt(pw, uinfo->pwhash);
 	if (cryptpw == NULL)
-		FATAL("could not hash password of user %s: %s", uinfo->name,
+		DIE("could not hash password of user %s: %s", uinfo->name,
 		      strerror(errno));
 
 	return strcmp(cryptpw, uinfo->pwhash) == 0;

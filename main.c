@@ -19,17 +19,37 @@
 #include "physlock.h"
 #include "auth.h"
 #include "options.h"
-#include "signals.h"
 #include "vt.h"
 
 #include <string.h>
 #include <unistd.h>
 #include <errno.h>
+#include <signal.h>
 
 #define PASSWD_LEN 1024
 
 int oldvt;
 vt_t vt;
+
+void sa_handler_exit(int signum) {
+	cleanup();
+	exit(0);
+}
+
+int setup_signal(int signum, void (*handler)(int)) {
+	struct sigaction sigact;
+
+	sigact.sa_flags = 0;
+	sigact.sa_handler = handler;
+	sigemptyset(&sigact.sa_mask);
+	
+	if (sigaction(signum, &sigact, NULL) < 0) {
+		WARN("could not set handler for signal %d: %s", signum, strerror(errno));
+		return -1;
+	} else {
+		return 0;
+	}
+}
 
 int main(int argc, char **argv) {
 	int only_root, auth = 0, len, chpid;
@@ -48,12 +68,12 @@ int main(int argc, char **argv) {
 		return 1;
 	}
 
-	signal_exit(SIGTERM);
-	signal_exit(SIGQUIT);
-	signal_ignore(SIGUSR1);
-	signal_ignore(SIGUSR2);
-	signal_ignore(SIGHUP);
-	signal_ignore(SIGINT);
+	setup_signal(SIGTERM, sa_handler_exit);
+	setup_signal(SIGQUIT, sa_handler_exit);
+	setup_signal(SIGHUP, SIG_IGN);
+	setup_signal(SIGINT, SIG_IGN);
+	setup_signal(SIGUSR1, SIG_IGN);
+	setup_signal(SIGUSR2, SIG_IGN);
 
 	vt_init();
 
@@ -88,7 +108,7 @@ int main(int argc, char **argv) {
 	if (options->detach) {
 		chpid = fork();
 		if (chpid < 0)
-			FATAL("could not spawn background process: %s", strerror(errno));
+			DIE("could not spawn background process: %s", strerror(errno));
 		else if (chpid > 0)
 			return 0;
 		else
@@ -111,7 +131,7 @@ int main(int argc, char **argv) {
 					break;
 				}
 				if (ferror(vt.ios))
-					FATAL("could not read from console: %s", strerror(errno));
+					DIE("could not read from console: %s", strerror(errno));
 			}
 			tty_break_off(&vt);
 		} else {
@@ -126,7 +146,7 @@ int main(int argc, char **argv) {
 			passwd[len-1] = '\0';
 
 		if (ferror(vt.ios))
-			FATAL("could not read from console: %s", strerror(errno));
+			DIE("could not read from console: %s", strerror(errno));
 
 		auth = authenticate(as, passwd);
 		if (!auth) {

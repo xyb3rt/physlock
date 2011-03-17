@@ -37,7 +37,7 @@ char filename[FNAME_LEN];
 void vt_init() {
 	fd = open(CONSOLE_DEVICE, O_RDWR);
 	if (fd < 0)
-		FATAL("could not open console device %s: %s", CONSOLE_DEVICE,
+		DIE("could not open console device %s: %s", CONSOLE_DEVICE,
 		      strerror(errno));
 }
 
@@ -54,22 +54,22 @@ void get_current_vt(int *nr, const char **user) {
 	struct passwd *userinfo;
 
 	if (fd < 0)
-		FATAL("get_current_vt() called without vt_init()");
+		DIE("get_current_vt() called without vt_init()");
 
 	if (ioctl(fd, VT_GETSTATE, &vtstat) < 0)
-		FATAL("could not get state of active console: %s", strerror(errno));
+		DIE("could not get state of active console: %s", strerror(errno));
 	*nr = vtstat.v_active;
 
 	if (user != NULL) {
 		snprintf(filename, FNAME_LEN, TTY_DEVICE_BASE "%d", *nr);
 		if (stat(filename, &fstat) < 0)
-			FATAL("could not stat file %s: %s", filename, strerror(errno));
+			DIE("could not stat file %s: %s", filename, strerror(errno));
 		userinfo = getpwuid(fstat.st_uid);
 		if (userinfo == NULL)
-			FATAL("could not get user info for uid %d", fstat.st_uid);
+			DIE("could not get user info for uid %d", fstat.st_uid);
 		*user = strdup(userinfo->pw_name);
 		if (*user == NULL)
-			FATAL("could not allocate memory");
+			DIE("could not allocate memory");
 	}
 }
 
@@ -79,17 +79,17 @@ void acquire_new_vt(vt_t *vt) {
 	vt->fd = -1;
 
 	if (fd < 0)
-		FATAL("acquire_new_vt() called without vt_init()");
+		DIE("acquire_new_vt() called without vt_init()");
 	if (ioctl(fd, VT_OPENQRY, &vt->nr) < 0)
-		FATAL("could not open new console: %s", strerror(errno));
+		DIE("could not open new console: %s", strerror(errno));
 	if (ioctl(fd, VT_ACTIVATE, vt->nr) < 0 ||
 			ioctl(fd, VT_WAITACTIVE, vt->nr) < 0)
-		FATAL("could not activate console # %d: %s", vt->nr, strerror(errno));
+		DIE("could not activate console # %d: %s", vt->nr, strerror(errno));
 
 	snprintf(filename, FNAME_LEN, TTY_DEVICE_BASE "%d", vt->nr);
 	vt->ios = fopen(filename, "r+");
 	if (vt->ios == NULL)
-		FATAL("could not open file %s: %s", filename, strerror(errno));
+		DIE("could not open file %s: %s", filename, strerror(errno));
 	vt->fd = fileno(vt->ios);
 
 	tcgetattr(vt->fd, &vt->term);
@@ -98,12 +98,12 @@ void acquire_new_vt(vt_t *vt) {
 
 void release_vt(vt_t *vt, int nr) {
 	if (fd < 0)
-		FATAL("release_vt() called without vt_init()");
+		DIE("release_vt() called without vt_init()");
 	if (nr <= 0)
-		FATAL("release_vt() called with invalid argument");
+		DIE("release_vt() called with invalid argument");
 	if (ioctl(fd, VT_ACTIVATE, nr) < 0 ||
 			ioctl(fd, VT_WAITACTIVE, nr) < 0)
-		FATAL("could not activate console # %d: %s", vt->nr, strerror(errno));
+		DIE("could not activate console # %d: %s", vt->nr, strerror(errno));
 
 	if (vt->ios != NULL) {
 		fclose(vt->ios);
@@ -113,28 +113,28 @@ void release_vt(vt_t *vt, int nr) {
 
 	if (vt->nr > 0) {
 		if (ioctl(fd, VT_DISALLOCATE, vt->nr) < 0)
-			FATAL("could not deallocate console # %d: %s", vt->nr, strerror(errno));
+			DIE("could not deallocate console # %d: %s", vt->nr, strerror(errno));
 		vt->nr = -1;
 	}
 }
 
 void lock_vt_switch() {
 	if (fd < 0)
-		FATAL("lock_vt_switch() called without vt_init()");
+		DIE("lock_vt_switch() called without vt_init()");
 	if (ioctl(fd, VT_LOCKSWITCH, 1) < 0)
-		FATAL("could not lock console switching: %s", strerror(errno));
+		DIE("could not lock console switching: %s", strerror(errno));
 }
 
 void unlock_vt_switch() {
 	if (fd < 0)
-		FATAL("unlock_vt_switch() called without vt_init()");
+		DIE("unlock_vt_switch() called without vt_init()");
 	if (ioctl(fd, VT_UNLOCKSWITCH, 1) < 0)
-		FATAL("could not enable console switching: %s", strerror(errno));
+		DIE("could not enable console switching: %s", strerror(errno));
 }
 
 void secure_vt(vt_t *vt) {
 	if (vt->fd < 0)
-		FATAL("secure_vt() called with invalid argument");
+		DIE("secure_vt() called with invalid argument");
 	vt->term.c_lflag &= ~(ECHO | ISIG);
 	tcsetattr(vt->fd, TCSANOW, &vt->term);
 }
@@ -159,7 +159,7 @@ void tty_break_off(vt_t *vt) {
 
 void reset_vt(vt_t *vt) {
 	if (vt->fd < 0)
-		FATAL("reset_vt() called with invalid argument");
+		DIE("reset_vt() called with invalid argument");
 	vt->term.c_lflag = vt->rlflag;
 	tcsetattr(vt->fd, TCSANOW, &vt->term);
 }

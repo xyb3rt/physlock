@@ -37,7 +37,7 @@
 		fprintf(stderr, "\n");                                             \
 	} while (0)
 
-#define FATAL(...)                                                     \
+#define DIE(...)                                                       \
   do {                                                                 \
 		fprintf(stderr, "physlock: %s:%d: error: ", __FILE__, __LINE__);   \
 		fprintf(stderr, __VA_ARGS__);                                      \

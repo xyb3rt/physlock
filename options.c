@@ -31,8 +31,7 @@ void print_usage() {
 }
 
 void print_version() {
-	printf("physlock - lock all consoles\n");
-	printf("Version %s, written by Bert Muennich\n", VERSION);
+	printf("physlock %s - lock all consoles\n", VERSION);
 }
 
 void parse_options(int argc, char **argv) {
