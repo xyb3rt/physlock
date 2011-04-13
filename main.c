@@ -19,6 +19,7 @@
 #include "physlock.h"
 #include "auth.h"
 #include "options.h"
+#include "sysrq.h"
 #include "vt.h"
 
 #include <string.h>
@@ -30,6 +31,7 @@
 
 int oldvt;
 vt_t vt;
+int oldsysrq;
 
 void sa_handler_exit(int signum) {
 	cleanup();
@@ -57,7 +59,7 @@ int main(int argc, char **argv) {
 	uid_t uid;
 	userinfo_t *as, root, user;
 
-	oldvt = vt.nr = vt.fd = -1;
+	oldvt = oldsysrq = vt.nr = vt.fd = -1;
 	vt.ios = NULL;
 	root.name = "root";
 
@@ -85,6 +87,12 @@ int main(int argc, char **argv) {
 		unlock_vt_switch();
 		vt_destroy();
 		return 0;
+	}
+
+	if (options->disable_sysrq) {
+		oldsysrq = get_sysrq_state();
+		if (oldsysrq > 0)
+			set_sysrq_state(0);
 	}
 
 	if (options->user) {
@@ -164,6 +172,8 @@ void cleanup() {
 	static int in = 0;
 
 	if (!in++) {
+		if (oldsysrq > 0)
+			set_sysrq_state(oldsysrq);
 		if (vt.fd >= 0)
 			reset_vt(&vt);
 		unlock_vt_switch();

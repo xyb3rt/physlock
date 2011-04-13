@@ -1,4 +1,4 @@
-/* physlock: options.h
+/* physlock: sysrq.h
  * Copyright (c) 2011 Bert Muennich <muennich at informatik.hu-berlin.de>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -16,22 +16,12 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef OPTIONS_H
-#define OPTIONS_H
+#ifndef SYSRQ_H
+#define SYSRQ_H
 
-typedef struct options_s {
-	int detach;
-	int disable_sysrq;
-	int only_lock;
-	int only_unlock;
-	const char *user;
-} options_t;
+#define SYSRQ_PATH "/proc/sys/kernel/sysrq"
 
-extern const options_t *options;
+int get_sysrq_state();
+void set_sysrq_state(int);
 
-void print_usage();
-void print_version();
-
-void parse_options(int, char**);
-
-#endif /* OPTIONS_H */
+#endif /* SYSRQ_H */
