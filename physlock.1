@@ -3,7 +3,7 @@
 physlock \- lock all consoles / virtual terminals
 .SH SYNOPSIS
 .B physlock
-.RB [ \-dhLlv ]
+.RB [ \-dhLlsv ]
 .RB [ \-u
 .IR USER ]
 .SH DESCRIPTION
@@ -36,13 +36,15 @@ Only enable (unlock) console switching and exit. This is useful when a prior
 instance of physlock has crashed and leaved the console switching mechanism
 locked.
 .TP
+.B \-s
+Disable SysRq mechanism while physlock is running.
+.TP
 .B \-v
 Print version information to standard output and exit.
 .TP
 .B \-u USER
-Allow the given user to unlock the computer. Using this option
-disables physlocks mechanism to guess the currently active user by looking at
-the file ownership of the foreground console device.
+Allow the given user to unlock the computer. Using this option prevents physlock
+from using the name of the calling user.
 .SH AUTHORS
 .TP
 Bert Muennich <ber.t at gmx.com>
