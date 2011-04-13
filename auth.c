@@ -51,7 +51,7 @@ void get_pwhash(userinfo_t *uinfo) {
 
 	spw = getspnam(uinfo->name);
 	if (spw == NULL)
-		DIE("could not get password for user %s", uinfo->name);
+		DIE("could not get password hash for user %s", uinfo->name);
 
 	uinfo->pwhash = strdup(spw->sp_pwdp);
 	if (uinfo->pwhash == NULL)
