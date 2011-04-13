@@ -20,9 +20,26 @@
 #include "auth.h"
 
 #include <string.h>
+#include <pwd.h>
 #include <shadow.h>
+#include <sys/types.h>
 #include <unistd.h>
 #include <errno.h>
+
+void get_uname(userinfo_t *uinfo, uid_t uid) {
+	struct passwd *pw;
+
+	if (uinfo == NULL)
+		return;
+
+	pw = getpwuid(uid);
+	if (pw == NULL)
+		DIE("could not get user info for uid %u\n", uid);
+	
+	uinfo->name = strdup(pw->pw_name);
+	if (uinfo->name == NULL)
+		DIE("could not allocate memory");
+}
 
 void get_pwhash(userinfo_t *uinfo) {
 	struct spwd *spw;

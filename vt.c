@@ -48,10 +48,8 @@ void vt_destroy() {
 	}
 }
 
-void get_current_vt(int *nr, const char **user) {
-	struct stat fstat;
+void get_current_vt(int *nr) {
 	struct vt_stat vtstat;
-	struct passwd *userinfo;
 
 	if (fd < 0)
 		DIE("get_current_vt() called without vt_init()");
@@ -59,18 +57,6 @@ void get_current_vt(int *nr, const char **user) {
 	if (ioctl(fd, VT_GETSTATE, &vtstat) < 0)
 		DIE("could not get state of active console: %s", strerror(errno));
 	*nr = vtstat.v_active;
-
-	if (user != NULL) {
-		snprintf(filename, FNAME_LEN, TTY_DEVICE_BASE "%d", *nr);
-		if (stat(filename, &fstat) < 0)
-			DIE("could not stat file %s: %s", filename, strerror(errno));
-		userinfo = getpwuid(fstat.st_uid);
-		if (userinfo == NULL)
-			DIE("could not get user info for uid %d", fstat.st_uid);
-		*user = strdup(userinfo->pw_name);
-		if (*user == NULL)
-			DIE("could not allocate memory");
-	}
 }
 
 void acquire_new_vt(vt_t *vt) {

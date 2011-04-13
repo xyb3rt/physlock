@@ -54,7 +54,7 @@ int setup_signal(int signum, void (*handler)(int)) {
 int main(int argc, char **argv) {
 	int only_root, auth = 0, len, chpid;
 	char c, passwd[PASSWD_LEN];
-	const char **uptr;
+	uid_t uid;
 	userinfo_t *as, root, user;
 
 	oldvt = vt.nr = vt.fd = -1;
@@ -87,14 +87,14 @@ int main(int argc, char **argv) {
 		return 0;
 	}
 
-	if (options->user != NULL) {
-		uptr = NULL;
+	if (options->user) {
 		user.name = options->user;
 	} else {
-		uptr = &user.name;
+		uid = getuid();
+		get_uname(&user, uid);
 	}
 
-	get_current_vt(&oldvt, uptr);
+	get_current_vt(&oldvt);
 
 	get_pwhash(&root);
 	only_root = strcmp(user.name, "root") == 0;

@@ -32,7 +32,7 @@ typedef struct vt_s {
 void vt_init();
 void vt_destroy();
 
-void get_current_vt(int*, const char**);
+void get_current_vt(int*);
 void acquire_new_vt(vt_t*);
 void release_vt(vt_t*, int);
 
