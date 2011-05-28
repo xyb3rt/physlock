@@ -18,10 +18,10 @@ physlock:	$(OBJFILES)
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 install: all
-	install -D -m 4755 -o root -g root physlock $(PREFIX)/sbin/physlock
-	mkdir -p $(PREFIX)/share/man/man1
-	sed "s/VERSION/$(VERSION)/g" physlock.1 > $(PREFIX)/share/man/man1/physlock.1
-	chmod 644 $(PREFIX)/share/man/man1/physlock.1
+	install -D -m 4755 -o root -g root physlock $(DESTDIR)$(PREFIX)/sbin/physlock
+	mkdir -p $(DESTDIR)$(PREFIX)/share/man/man1
+	sed "s/VERSION/$(VERSION)/g" physlock.1 > $(DESTDIR)$(PREFIX)/share/man/man1/physlock.1
+	chmod 644 $(DESTDIR)$(PREFIX)/share/man/man1/physlock.1
 
 clean:
 	rm -f physlock *.o
