@@ -159,11 +159,10 @@ int main(int argc, char **argv) {
 			}
 			tty_echo_off(&vt);
 		} else {
-			prompt(vt.ios, "\nPress [Enter] to unlock. ");
-			fprintf(vt.ios, "\n");
+			prompt(vt.ios, "\nPress [Enter] to unlock.\n");
 		}
 
-		prompt(vt.ios, "%s's password:", as->name);
+		prompt(vt.ios, "%s's password: ", as->name);
 		auth = authenticate(as, buf);
 		if (!auth) {
 			fprintf(vt.ios, "\nAuthentication failed\n");
