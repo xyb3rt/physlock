@@ -125,21 +125,21 @@ void secure_vt(vt_t *vt) {
 	tcsetattr(vt->fd, TCSANOW, &vt->term);
 }
 
-void tty_break_on(vt_t *vt) {
+void tty_echo_on(vt_t *vt) {
 	if (vt->fd < 0) {
 		WARN("tty_break_on() called with invalid argument");
 		return;
 	}
-	vt->term.c_lflag &= ~ICANON;
+	vt->term.c_lflag |= ECHO;
 	tcsetattr(vt->fd, TCSANOW, &vt->term);
 }
 
-void tty_break_off(vt_t *vt) {
+void tty_echo_off(vt_t *vt) {
 	if (vt->fd < 0) {
 		WARN("tty_break_off() called with invalid argument");
 		return;
 	}
-	vt->term.c_lflag |= ICANON;
+	vt->term.c_lflag &= ~ECHO;
 	tcsetattr(vt->fd, TCSANOW, &vt->term);
 }
 

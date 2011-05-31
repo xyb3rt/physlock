@@ -23,12 +23,14 @@
 #include "vt.h"
 
 #include <string.h>
+#include <stdarg.h>
 #include <unistd.h>
 #include <errno.h>
 #include <signal.h>
 
-#define PASSWD_LEN 1024
+#define BUFLEN 1024
 
+char buf[BUFLEN];
 int oldvt;
 vt_t vt;
 int oldsysrq;
@@ -53,9 +55,28 @@ int setup_signal(int signum, void (*handler)(int)) {
 	}
 }
 
+void prompt(FILE *stream, const char *fmt, ...) {
+	char *end;
+	va_list args;
+
+	if (!stream || !fmt)
+		return;
+
+	va_start(args, fmt);
+	vfprintf(stream, fmt, args);
+	va_end(args);
+
+	fgets(buf, BUFLEN, stream);
+	if (ferror(stream))
+		DIE("could not read from console: %s", strerror(errno));
+	if ((end = strchr(buf, '\n')))
+		*end = '\0';
+	else
+		while (fgetc(stream) != '\n');
+}
+
 int main(int argc, char **argv) {
-	int only_root, auth = 0, len, chpid;
-	char c, passwd[PASSWD_LEN];
+	int only_root, auth = 0, chpid;
 	uid_t uid;
 	userinfo_t *as, root, user;
 
@@ -105,7 +126,7 @@ int main(int argc, char **argv) {
 	get_current_vt(&oldvt);
 
 	get_pwhash(&root);
-	only_root = strcmp(user.name, "root") == 0;
+	only_root = strcmp(user.name, root.name) == 0;
 	if (!only_root)
 		get_pwhash(&user);
 
@@ -126,37 +147,23 @@ int main(int argc, char **argv) {
 	while (!auth) {
 		as = &root;
 		if (!only_root) {
-			tty_break_on(&vt);
-			fprintf(vt.ios,
-					"\nPress [R] to unlock as root or [U] to unlock as %s.\n",
-					user.name);
+			tty_echo_on(&vt);
 			while (1) {
-				c = fgetc(vt.ios);
-				if (c == 'R' || c == 'r') {
-					break;
-				} else if (c == 'U' || c == 'u') {
+				prompt(vt.ios, "\nUnlock as [%s/%s]: ", user.name, root.name);
+				if (!*buf || !strcmp(buf, user.name)) {
 					as = &user;
 					break;
+				} else if (!strcmp(buf, root.name)) {
+					break;
 				}
-				if (ferror(vt.ios))
-					DIE("could not read from console: %s", strerror(errno));
 			}
-			tty_break_off(&vt);
+			tty_echo_off(&vt);
 		} else {
-			fprintf(vt.ios, "\nPress [Enter] to unlock.\n");
-			fgetc(vt.ios);
+			prompt(vt.ios, "\nPress [Enter] to unlock.\n");
 		}
 
-		fprintf(vt.ios, "%s's password:", as->name);
-		fgets(passwd, PASSWD_LEN, vt.ios);
-		len = strlen(passwd);
-		if (len > 0 && passwd[len-1] == '\n')
-			passwd[len-1] = '\0';
-
-		if (ferror(vt.ios))
-			DIE("could not read from console: %s", strerror(errno));
-
-		auth = authenticate(as, passwd);
+		prompt(vt.ios, "%s's password: ", as->name);
+		auth = authenticate(as, buf);
 		if (!auth) {
 			fprintf(vt.ios, "\nAuthentication failed\n");
 			sleep(AUTH_FAIL_TIMEOUT);
