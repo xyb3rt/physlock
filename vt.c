@@ -146,6 +146,10 @@ void tty_echo_off(vt_t *vt) {
 void reset_vt(vt_t *vt) {
 	if (vt->fd < 0)
 		DIE("reset_vt() called with invalid argument");
+
+	/* clear the screen: */
+	fprintf(vt->ios, "\033[H\033[J");
+
 	vt->term.c_lflag = vt->rlflag;
 	tcsetattr(vt->fd, TCSANOW, &vt->term);
 }
