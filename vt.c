@@ -29,7 +29,7 @@
 #include <sys/ioctl.h>
 #include <errno.h>
 
-#define FNAME_LEN 512
+enum { FNAME_LEN = 512 };
 
 int fd = -1;
 char filename[FNAME_LEN];
@@ -72,7 +72,7 @@ void acquire_new_vt(vt_t *vt) {
 			ioctl(fd, VT_WAITACTIVE, vt->nr) < 0)
 		DIE("could not activate console # %d: %s", vt->nr, strerror(errno));
 
-	snprintf(filename, FNAME_LEN, TTY_DEVICE_BASE "%d", vt->nr);
+	snprintf(filename, FNAME_LEN, "%s%d", TTY_DEVICE_BASE, vt->nr);
 	vt->ios = fopen(filename, "r+");
 	if (vt->ios == NULL)
 		DIE("could not open file %s: %s", filename, strerror(errno));
