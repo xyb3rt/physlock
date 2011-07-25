@@ -16,24 +16,40 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "physlock.h"
 #include "auth.h"
+#include "config.h"
 #include "options.h"
-#include "sysrq.h"
+#include "util.h"
 #include "vt.h"
 
+#include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
 #include <unistd.h>
 #include <errno.h>
 #include <signal.h>
 
-#define BUFLEN 1024
+enum { BUFLEN = 1024 };
 
 char buf[BUFLEN];
 int oldvt;
 vt_t vt;
 int oldsysrq;
+
+void cleanup() {
+	static int in = 0;
+
+	if (!in++) {
+		if (oldsysrq > 0)
+			set_sysrq_state(SYSRQ_PATH, oldsysrq);
+		if (vt.fd >= 0)
+			reset_vt(&vt);
+		unlock_vt_switch();
+		release_vt(&vt, oldvt);
+		vt_destroy();
+	}
+}
 
 void sa_handler_exit(int signum) {
 	cleanup();
@@ -48,7 +64,7 @@ int setup_signal(int signum, void (*handler)(int)) {
 	sigemptyset(&sigact.sa_mask);
 	
 	if (sigaction(signum, &sigact, NULL) < 0) {
-		WARN("could not set handler for signal %d: %s", signum, strerror(errno));
+		warn("could not set handler for signal %d: %s", signum, strerror(errno));
 		return -1;
 	} else {
 		return 0;
@@ -68,7 +84,7 @@ void prompt(FILE *stream, const char *fmt, ...) {
 
 	fgets(buf, BUFLEN, stream);
 	if (ferror(stream))
-		DIE("could not read from console: %s", strerror(errno));
+		die("could not read from console: %s", strerror(errno));
 	if ((end = strchr(buf, '\n')))
 		*end = '\0';
 	else
@@ -111,9 +127,9 @@ int main(int argc, char **argv) {
 	}
 
 	if (options->disable_sysrq) {
-		oldsysrq = get_sysrq_state();
+		oldsysrq = get_sysrq_state(SYSRQ_PATH);
 		if (oldsysrq > 0)
-			set_sysrq_state(0);
+			set_sysrq_state(SYSRQ_PATH, 0);
 	}
 
 	if (options->user) {
@@ -137,7 +153,7 @@ int main(int argc, char **argv) {
 	if (options->detach) {
 		chpid = fork();
 		if (chpid < 0)
-			DIE("could not spawn background process: %s", strerror(errno));
+			die("could not spawn background process: %s", strerror(errno));
 		else if (chpid > 0)
 			return 0;
 		else
@@ -173,18 +189,4 @@ int main(int argc, char **argv) {
 	cleanup();
 
 	return 0;
-}
-
-void cleanup() {
-	static int in = 0;
-
-	if (!in++) {
-		if (oldsysrq > 0)
-			set_sysrq_state(oldsysrq);
-		if (vt.fd >= 0)
-			reset_vt(&vt);
-		unlock_vt_switch();
-		release_vt(&vt, oldvt);
-		vt_destroy();
-	}
 }

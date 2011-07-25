@@ -1,10 +1,10 @@
 all: physlock
 
-VERSION=git-20110722
+VERSION=git-20110725
 
 CC?=gcc
 PREFIX?=/usr/local
-CFLAGS+= -std=c99 -Wall -pedantic -DVERSION=\"$(VERSION)\"
+CFLAGS+= -Wall -pedantic -DVERSION=\"$(VERSION)\"
 LDFLAGS+= 
 LIBS+= -lcrypt
 

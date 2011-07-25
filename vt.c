@@ -16,7 +16,8 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "physlock.h"
+#include "config.h"
+#include "util.h"
 #include "vt.h"
 
 #include <fcntl.h>
@@ -29,7 +30,7 @@
 #include <sys/ioctl.h>
 #include <errno.h>
 
-enum { FNAME_LEN = 512 };
+enum { FNAME_LEN = 1024 };
 
 int fd = -1;
 char filename[FNAME_LEN];
@@ -37,7 +38,7 @@ char filename[FNAME_LEN];
 void vt_init() {
 	fd = open(CONSOLE_DEVICE, O_RDWR);
 	if (fd < 0)
-		DIE("could not open console device %s: %s", CONSOLE_DEVICE,
+		die("could not open console device %s: %s", CONSOLE_DEVICE,
 		      strerror(errno));
 }
 
@@ -52,10 +53,10 @@ void get_current_vt(int *nr) {
 	struct vt_stat vtstat;
 
 	if (fd < 0)
-		DIE("get_current_vt() called without vt_init()");
+		die("get_current_vt() called without vt_init()");
 
 	if (ioctl(fd, VT_GETSTATE, &vtstat) < 0)
-		DIE("could not get state of active console: %s", strerror(errno));
+		die("could not get state of active console: %s", strerror(errno));
 	*nr = vtstat.v_active;
 }
 
@@ -65,17 +66,17 @@ void acquire_new_vt(vt_t *vt) {
 	vt->fd = -1;
 
 	if (fd < 0)
-		DIE("acquire_new_vt() called without vt_init()");
+		die("acquire_new_vt() called without vt_init()");
 	if (ioctl(fd, VT_OPENQRY, &vt->nr) < 0)
-		DIE("could not open new console: %s", strerror(errno));
+		die("could not open new console: %s", strerror(errno));
 	if (ioctl(fd, VT_ACTIVATE, vt->nr) < 0 ||
 			ioctl(fd, VT_WAITACTIVE, vt->nr) < 0)
-		DIE("could not activate console # %d: %s", vt->nr, strerror(errno));
+		die("could not activate console # %d: %s", vt->nr, strerror(errno));
 
 	snprintf(filename, FNAME_LEN, "%s%d", TTY_DEVICE_BASE, vt->nr);
 	vt->ios = fopen(filename, "r+");
 	if (vt->ios == NULL)
-		DIE("could not open file %s: %s", filename, strerror(errno));
+		die("could not open file %s: %s", filename, strerror(errno));
 	vt->fd = fileno(vt->ios);
 
 	tcgetattr(vt->fd, &vt->term);
@@ -84,12 +85,12 @@ void acquire_new_vt(vt_t *vt) {
 
 void release_vt(vt_t *vt, int nr) {
 	if (fd < 0)
-		DIE("release_vt() called without vt_init()");
+		die("release_vt() called without vt_init()");
 	if (nr <= 0)
-		DIE("release_vt() called with invalid argument");
+		die("release_vt() called with invalid argument");
 	if (ioctl(fd, VT_ACTIVATE, nr) < 0 ||
 			ioctl(fd, VT_WAITACTIVE, nr) < 0)
-		DIE("could not activate console # %d: %s", vt->nr, strerror(errno));
+		die("could not activate console # %d: %s", vt->nr, strerror(errno));
 
 	if (vt->ios != NULL) {
 		fclose(vt->ios);
@@ -99,35 +100,35 @@ void release_vt(vt_t *vt, int nr) {
 
 	if (vt->nr > 0) {
 		if (ioctl(fd, VT_DISALLOCATE, vt->nr) < 0)
-			DIE("could not deallocate console # %d: %s", vt->nr, strerror(errno));
+			die("could not deallocate console # %d: %s", vt->nr, strerror(errno));
 		vt->nr = -1;
 	}
 }
 
 void lock_vt_switch() {
 	if (fd < 0)
-		DIE("lock_vt_switch() called without vt_init()");
+		die("lock_vt_switch() called without vt_init()");
 	if (ioctl(fd, VT_LOCKSWITCH, 1) < 0)
-		DIE("could not lock console switching: %s", strerror(errno));
+		die("could not lock console switching: %s", strerror(errno));
 }
 
 void unlock_vt_switch() {
 	if (fd < 0)
-		DIE("unlock_vt_switch() called without vt_init()");
+		die("unlock_vt_switch() called without vt_init()");
 	if (ioctl(fd, VT_UNLOCKSWITCH, 1) < 0)
-		DIE("could not enable console switching: %s", strerror(errno));
+		die("could not enable console switching: %s", strerror(errno));
 }
 
 void secure_vt(vt_t *vt) {
 	if (vt->fd < 0)
-		DIE("secure_vt() called with invalid argument");
+		die("secure_vt() called with invalid argument");
 	vt->term.c_lflag &= ~(ECHO | ISIG);
 	tcsetattr(vt->fd, TCSANOW, &vt->term);
 }
 
 void tty_echo_on(vt_t *vt) {
 	if (vt->fd < 0) {
-		WARN("tty_break_on() called with invalid argument");
+		warn("tty_break_on() called with invalid argument");
 		return;
 	}
 	vt->term.c_lflag |= ECHO;
@@ -136,7 +137,7 @@ void tty_echo_on(vt_t *vt) {
 
 void tty_echo_off(vt_t *vt) {
 	if (vt->fd < 0) {
-		WARN("tty_break_off() called with invalid argument");
+		warn("tty_break_off() called with invalid argument");
 		return;
 	}
 	vt->term.c_lflag &= ~ECHO;
@@ -145,7 +146,7 @@ void tty_echo_off(vt_t *vt) {
 
 void reset_vt(vt_t *vt) {
 	if (vt->fd < 0)
-		DIE("reset_vt() called with invalid argument");
+		die("reset_vt() called with invalid argument");
 
 	/* clear the screen: */
 	fprintf(vt->ios, "\033[H\033[J");

@@ -19,6 +19,7 @@
 #ifndef VT_H
 #define VT_H
 
+#include <stdio.h>
 #include <termios.h>
 
 typedef struct vt_s {

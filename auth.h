@@ -19,6 +19,8 @@
 #ifndef AUTH_H
 #define AUTH_H
 
+#include <sys/types.h>
+
 typedef struct userinfo_s {
 	const char *name;
 	const char *pwhash;

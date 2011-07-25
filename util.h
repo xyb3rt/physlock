@@ -1,4 +1,4 @@
-/* physlock: sysrq.h
+/* sxiv: util.h
  * Copyright (c) 2011 Bert Muennich <muennich at informatik.hu-berlin.de>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -16,12 +16,15 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef SYSRQ_H
-#define SYSRQ_H
+#ifndef UTIL_H
+#define UTIL_H
 
-#define SYSRQ_PATH "/proc/sys/kernel/sysrq"
+#include <stdarg.h>
 
-int get_sysrq_state();
-void set_sysrq_state(int);
+void warn(const char*, ...);
+void die(const char*, ...);
 
-#endif /* SYSRQ_H */
+int get_sysrq_state(const char*);
+void set_sysrq_state(const char*, int);
+
+#endif /* UTIL_H */

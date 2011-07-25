@@ -16,15 +16,16 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "physlock.h"
-#include "auth.h"
+#define _XOPEN_SOURCE 500 /* for crypt() and strdup() */
 
 #include <string.h>
-#include <pwd.h>
 #include <shadow.h>
-#include <sys/types.h>
+#include <pwd.h>
 #include <unistd.h>
 #include <errno.h>
+
+#include "auth.h"
+#include "util.h"
 
 void get_uname(userinfo_t *uinfo, uid_t uid) {
 	struct passwd *pw;
@@ -34,11 +35,11 @@ void get_uname(userinfo_t *uinfo, uid_t uid) {
 
 	pw = getpwuid(uid);
 	if (pw == NULL)
-		DIE("could not get user info for uid %u\n", uid);
+		die("could not get user info for uid %u\n", uid);
 	
 	uinfo->name = strdup(pw->pw_name);
 	if (uinfo->name == NULL)
-		DIE("could not allocate memory");
+		die("could not allocate memory");
 }
 
 void get_pwhash(userinfo_t *uinfo) {
@@ -51,11 +52,11 @@ void get_pwhash(userinfo_t *uinfo) {
 
 	spw = getspnam(uinfo->name);
 	if (spw == NULL)
-		DIE("could not get password hash for user %s", uinfo->name);
+		die("could not get password hash for user %s", uinfo->name);
 
 	uinfo->pwhash = strdup(spw->sp_pwdp);
 	if (uinfo->pwhash == NULL)
-		DIE("could not allocate memory");
+		die("could not allocate memory");
 
 	endspent();
 }
@@ -64,13 +65,13 @@ int authenticate(const userinfo_t *uinfo, const char *pw) {
 	char *cryptpw;
 
 	if (uinfo == NULL || uinfo->pwhash == NULL || pw == NULL) {
-		WARN("authenticate() called with invalid argument");
+		warn("authenticate() called with invalid argument");
 		return 0;
 	}
 
 	cryptpw = crypt(pw, uinfo->pwhash);
 	if (cryptpw == NULL)
-		DIE("could not hash password of user %s: %s", uinfo->name,
+		die("could not hash password of user %s: %s", uinfo->name,
 		      strerror(errno));
 
 	return strcmp(cryptpw, uinfo->pwhash) == 0;
