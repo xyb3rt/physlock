@@ -69,15 +69,16 @@ void acquire_new_vt(vt_t *vt) {
 		die("acquire_new_vt() called without vt_init()");
 	if (ioctl(fd, VT_OPENQRY, &vt->nr) < 0)
 		die("could not open new console: %s", strerror(errno));
-	if (ioctl(fd, VT_ACTIVATE, vt->nr) < 0 ||
-			ioctl(fd, VT_WAITACTIVE, vt->nr) < 0)
-		die("could not activate console # %d: %s", vt->nr, strerror(errno));
 
 	snprintf(filename, FNAME_LEN, "%s%d", TTY_DEVICE_BASE, vt->nr);
 	vt->ios = fopen(filename, "r+");
 	if (vt->ios == NULL)
 		die("could not open file %s: %s", filename, strerror(errno));
 	vt->fd = fileno(vt->ios);
+
+	if (ioctl(fd, VT_ACTIVATE, vt->nr) < 0 ||
+			ioctl(fd, VT_WAITACTIVE, vt->nr) < 0)
+		die("could not activate console # %d: %s", vt->nr, strerror(errno));
 
 	tcgetattr(vt->fd, &vt->term);
 	vt->rlflag = vt->term.c_lflag;
