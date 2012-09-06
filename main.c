@@ -72,8 +72,8 @@ int setup_signal(int signum, void (*handler)(int)) {
 }
 
 void prompt(FILE *stream, const char *fmt, ...) {
-	char *end;
 	va_list args;
+	unsigned int c, i = 0;
 
 	if (!stream || !fmt)
 		return;
@@ -82,13 +82,13 @@ void prompt(FILE *stream, const char *fmt, ...) {
 	vfprintf(stream, fmt, args);
 	va_end(args);
 
-	fgets(buf, BUFLEN, stream);
+	while ((c = fgetc(stream)) != EOF && c != '\n') {
+		if (c != '\0' && i + 1 < BUFLEN)
+			buf[i++] = (char) c;
+	}
 	if (ferror(stream))
 		die("could not read from console: %s", strerror(errno));
-	if ((end = strchr(buf, '\n')))
-		*end = '\0';
-	else
-		while (fgetc(stream) != '\n');
+	buf[i] = '\0';
 }
 
 int main(int argc, char **argv) {
