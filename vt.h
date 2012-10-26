@@ -43,6 +43,7 @@ void unlock_vt_switch();
 void secure_vt(vt_t*);
 void tty_echo_on(vt_t*);
 void tty_echo_off(vt_t*);
+void flush_vt(vt_t*);
 void reset_vt(vt_t*);
 
 #endif /* VT_H */

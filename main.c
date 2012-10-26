@@ -162,6 +162,7 @@ int main(int argc, char **argv) {
 
 	while (!auth) {
 		as = &root;
+		flush_vt(&vt);
 		if (!only_root) {
 			tty_echo_on(&vt);
 			while (1) {

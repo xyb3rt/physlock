@@ -23,10 +23,10 @@
 #include <fcntl.h>
 #include <pwd.h>
 #include <string.h>
+#include <unistd.h>
 #include <linux/vt.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <sys/unistd.h>
 #include <sys/ioctl.h>
 #include <errno.h>
 
@@ -143,6 +143,11 @@ void tty_echo_off(vt_t *vt) {
 	}
 	vt->term.c_lflag &= ~ECHO;
 	tcsetattr(vt->fd, TCSANOW, &vt->term);
+}
+
+void flush_vt(vt_t *vt) {
+	if (vt->fd >= 0)
+		tcflush(vt->fd, TCIFLUSH);
 }
 
 void reset_vt(vt_t *vt) {
