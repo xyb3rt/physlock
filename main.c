@@ -165,7 +165,7 @@ int main(int argc, char **argv) {
 		flush_vt(&vt);
 
 		prompt(vt.ios, "%s's password: ", as->name);
-		auth = authenticate(&user, buf);
+		auth = authenticate(as, buf);
 		if (!auth) {
 			fprintf(vt.ios, "\nAuthentication failed\n");
 			sleep(AUTH_FAIL_TIMEOUT);
