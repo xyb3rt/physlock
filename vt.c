@@ -1,5 +1,5 @@
 /* physlock: vt.c
- * Copyright (c) 2011 Bert Muennich <be.muennich at googlemail.com>
+ * Copyright (c) 2013 Bert Muennich <be.muennich at gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -16,9 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#include "config.h"
-#include "util.h"
-#include "vt.h"
+#define _POSIX_C_SOURCE 200112L
 
 #include <fcntl.h>
 #include <pwd.h>
@@ -30,10 +28,14 @@
 #include <sys/ioctl.h>
 #include <errno.h>
 
+#include "config.h"
+#include "util.h"
+#include "vt.h"
+
 enum { FNAME_LEN = 1024 };
 
-int fd = -1;
-char filename[FNAME_LEN];
+static int fd = -1;
+static char filename[FNAME_LEN];
 
 void vt_init() {
 	fd = open(CONSOLE_DEVICE, O_RDWR);

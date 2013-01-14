@@ -1,5 +1,5 @@
 /* physlock: auth.c
- * Copyright (c) 2011 Bert Muennich <be.muennich at googlemail.com>
+ * Copyright (c) 2013 Bert Muennich <be.muennich at gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -16,7 +16,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#define _XOPEN_SOURCE 500 /* for crypt() and strdup() */
+#define _POSIX_C_SOURCE 200112L
+#define _XOPEN_SOURCE   500 /* for crypt() and strdup() */
 
 #include <string.h>
 #include <shadow.h>

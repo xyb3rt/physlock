@@ -1,5 +1,5 @@
 /* physlock: main.c
- * Copyright (c) 2011 Bert Muennich <be.muennich at googlemail.com>
+ * Copyright (c) 2013 Bert Muennich <be.muennich at gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -16,11 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#include "auth.h"
-#include "config.h"
-#include "options.h"
-#include "util.h"
-#include "vt.h"
+#define _POSIX_C_SOURCE 200112L
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -30,12 +26,18 @@
 #include <errno.h>
 #include <signal.h>
 
+#include "auth.h"
+#include "config.h"
+#include "options.h"
+#include "util.h"
+#include "vt.h"
+
 enum { BUFLEN = 1024 };
 
-char buf[BUFLEN];
-int oldvt;
-vt_t vt;
-int oldsysrq;
+static char buf[BUFLEN];
+static int oldvt;
+static vt_t vt;
+static int oldsysrq;
 
 void cleanup() {
 	static int in = 0;
@@ -115,6 +117,7 @@ int main(int argc, char **argv) {
 	setup_signal(SIGUSR2, SIG_IGN);
 
 	vt_init();
+	get_current_vt(&oldvt);
 
 	if (options->only_lock) {
 		lock_vt_switch();
@@ -138,8 +141,6 @@ int main(int argc, char **argv) {
 		uid = getuid();
 		get_uname(&user, uid);
 	}
-
-	get_current_vt(&oldvt);
 
 	get_pwhash(&root);
 	only_root = strcmp(user.name, root.name) == 0;

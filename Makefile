@@ -1,20 +1,20 @@
 all: physlock
 
-VERSION=git-20121026
+VERSION = git-20130114
 
-CC?=gcc
-PREFIX?=/usr/local
-CFLAGS+= -Wall -pedantic -DVERSION=\"$(VERSION)\"
-LDFLAGS+= 
-LIBS+= -lcrypt
+CC      = gcc
+PREFIX  = /usr/local
+CFLAGS  = -Wall -pedantic -DVERSION=\"$(VERSION)\"
+LDFLAGS =
+LIBS    = -lcrypt
 
-SRCFILES=$(wildcard *.c)
-OBJFILES=$(SRCFILES:.c=.o)
+SRC = auth.c main.c options.c util.c vt.c
+OBJ = $(SRC:.c=.o)
 
-physlock:	$(OBJFILES)
+physlock:	$(OBJ)
 	$(CC) $(LDFLAGS) -o $@ $^ $(LIBS)
 
-%.o: %.c Makefile
+.c.o: Makefile
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 install: all
@@ -24,10 +24,4 @@ install: all
 	chmod 644 $(DESTDIR)$(PREFIX)/share/man/man1/physlock.1
 
 clean:
-	rm -f physlock *.o
-
-tags: *.h *.c
-	ctags $^
-
-cscope: *.h *.c
-	cscope -b
+	rm -f physlock $(OBJ)

@@ -1,5 +1,5 @@
 /* sxiv: util.h
- * Copyright (c) 2011 Bert Muennich <be.muennich at googlemail.com>
+ * Copyright (c) 2013 Bert Muennich <be.muennich at gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the

@@ -1,5 +1,5 @@
 /* physlock: options.c
- * Copyright (c) 2011 Bert Muennich <be.muennich at googlemail.com>
+ * Copyright (c) 2013 Bert Muennich <be.muennich at gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -16,13 +16,15 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#include "options.h"
+#define _POSIX_C_SOURCE 200112L
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
 
-options_t _options;
+#include "options.h"
+
+static options_t _options;
 const options_t *options = (const options_t*) &_options;
 
 void print_usage() {
