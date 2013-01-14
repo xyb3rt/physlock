@@ -7,10 +7,6 @@ suspend and can therefore only be used with some limitations.
 physlock is designed to be more lightweight, it does not have a plugin
 interface and it is not started using a shell script wrapper.
 
-Difference to the original Repo:
----------------------------------
-Only the password of the user who locked the screen is asked (so you don't have to type in your username).
-
 Installation
 ------------
 physlock is built using the commands:
@@ -48,4 +44,5 @@ The following command-line arguments are supported:
     -l       only lock console switching
     -L       only enable console switching
     -v       print version information and exit
+    -i       don't ask for an user
     -u USER  allow the given user to unlock the computer
