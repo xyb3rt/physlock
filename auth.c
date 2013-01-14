@@ -53,7 +53,7 @@ void get_pwhash(userinfo_t *uinfo) {
 
 	spw = getspnam(uinfo->name);
 	if (spw == NULL)
-		die("could not get password hash for user %s", uinfo->name);
+		die("could not get password hash of user %s", uinfo->name);
 
 	uinfo->pwhash = strdup(spw->sp_pwdp);
 	if (uinfo->pwhash == NULL)
@@ -65,15 +65,12 @@ void get_pwhash(userinfo_t *uinfo) {
 int authenticate(const userinfo_t *uinfo, const char *pw) {
 	char *cryptpw;
 
-	if (uinfo == NULL || uinfo->pwhash == NULL || pw == NULL) {
-		warn("authenticate() called with invalid argument");
+	if (uinfo == NULL || uinfo->pwhash == NULL || pw == NULL)
 		return 0;
-	}
 
 	cryptpw = crypt(pw, uinfo->pwhash);
 	if (cryptpw == NULL)
-		die("could not hash password of user %s: %s", uinfo->name,
-		      strerror(errno));
+		die("could not hash password for user %s", uinfo->name);
 
 	return strcmp(cryptpw, uinfo->pwhash) == 0;
 }

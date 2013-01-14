@@ -144,8 +144,10 @@ int main(int argc, char **argv) {
 
 	get_pwhash(&root);
 	only_root = strcmp(user.name, root.name) == 0;
-	if (!only_root)
+	if (!only_root) {
 		get_pwhash(&user);
+		authenticate(&user, ""); /* test authentication */
+	}
 
 	acquire_new_vt(&vt);
 	lock_vt_switch();
