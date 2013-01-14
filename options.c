@@ -26,7 +26,7 @@ options_t _options;
 const options_t *options = (const options_t*) &_options;
 
 void print_usage() {
-	printf("usage: physlock [-dhLlsv] [-u user]\n");
+	printf("usage: physlock [-dhLlsvi] [-u user]\n");
 }
 
 void print_version() {
@@ -35,14 +35,15 @@ void print_version() {
 
 void parse_options(int argc, char **argv) {
 	int opt;
-	
+
 	_options.detach = 0;
 	_options.disable_sysrq = 0;
 	_options.only_lock = 0;
 	_options.only_unlock = 0;
+	_options.ignore_user = 0;
 	_options.user = NULL;
 
-	while ((opt = getopt(argc, argv, "dhLlsu:v")) != -1) {
+	while ((opt = getopt(argc, argv, "dhLlsiu:v")) != -1) {
 		switch (opt) {
 			case '?':
 				print_usage();
@@ -62,6 +63,10 @@ void parse_options(int argc, char **argv) {
 			case 's':
 				_options.disable_sysrq = 1;
 			case 'u':
+				_options.user = optarg;
+				break;
+			case 'i':
+                _options.ignore_user = 1;
 				_options.user = optarg;
 				break;
 			case 'v':

@@ -44,4 +44,5 @@ The following command-line arguments are supported:
     -l       only lock console switching
     -L       only enable console switching
     -v       print version information and exit
+    -i       don't ask for an user
     -u USER  allow the given user to unlock the computer

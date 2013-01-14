@@ -24,6 +24,7 @@ typedef struct options_s {
 	int disable_sysrq;
 	int only_lock;
 	int only_unlock;
+	int ignore_user;
 	const char *user;
 } options_t;
 

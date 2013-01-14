@@ -62,7 +62,7 @@ int setup_signal(int signum, void (*handler)(int)) {
 	sigact.sa_flags = 0;
 	sigact.sa_handler = handler;
 	sigemptyset(&sigact.sa_mask);
-	
+
 	if (sigaction(signum, &sigact, NULL) < 0) {
 		warn("could not set handler for signal %d: %s", signum, strerror(errno));
 		return -1;
@@ -165,21 +165,29 @@ int main(int argc, char **argv) {
 		flush_vt(&vt);
 		if (!only_root) {
 			tty_echo_on(&vt);
-			while (1) {
-				prompt(vt.ios, "\nUnlock as [%s/%s]: ", user.name, root.name);
-				if (!*buf || !strcmp(buf, user.name)) {
-					as = &user;
-					break;
-				} else if (!strcmp(buf, root.name)) {
-					break;
-				}
+			if(!options->ignore_user) {
+                while (1) {
+                    prompt(vt.ios, "\nUnlock as [%s/%s]: ", user.name, root.name);
+                    if (!*buf || !strcmp(buf, user.name)) {
+                        as = &user;
+                        break;
+                    } else if (!strcmp(buf, root.name)) {
+                        break;
+                    }
+                }
+			} else {
+                as = &user;
 			}
+
 			tty_echo_off(&vt);
-		} else {
-			prompt(vt.ios, "\nPress [Enter] to unlock.\n");
 		}
 
-		prompt(vt.ios, "%s's password: ", as->name);
+		if (only_root || options->ignore_user) {
+		    prompt(vt.ios, "\n%s's password: ", as->name); /*for styling purposes...*/
+		} else {
+            prompt(vt.ios, "%s's password: ", as->name);
+		}
+
 		auth = authenticate(as, buf);
 		if (!auth) {
 			fprintf(vt.ios, "\nAuthentication failed\n");
