@@ -101,7 +101,6 @@ int main(int argc, char **argv) {
 
 	oldvt = oldsysrq = vt.nr = vt.fd = -1;
 	vt.ios = NULL;
-	root.name = "root";
 
 	parse_options(argc, argv);
 
@@ -136,6 +135,7 @@ int main(int argc, char **argv) {
 			set_sysrq_state(SYSRQ_PATH, 0);
 	}
 
+	get_uname(&root, 0);
 	if (options->user) {
 		user.name = options->user;
 	} else {
