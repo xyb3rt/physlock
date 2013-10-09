@@ -135,6 +135,7 @@ int main(int argc, char **argv) {
 			set_sysrq_state(SYSRQ_PATH, 0);
 	}
 
+	get_uname(&root, 0);
 	if (options->user) {
 		user.name = options->user;
 	} else {
@@ -164,24 +165,12 @@ int main(int argc, char **argv) {
 			setsid();
 	}
 
+	as = &root;
 	while (!auth) {
-		as = &root;
 		flush_vt(&vt);
-		if (!only_root) {
-			tty_echo_on(&vt);
-			while (1) {
-				prompt(vt.ios, "\nUnlock as [%s/%s]: ", user.name, root.name);
-				if (!*buf || !strcmp(buf, user.name)) {
-					as = &user;
-					break;
-				} else if (!strcmp(buf, root.name)) {
-					break;
-				}
-			}
-			tty_echo_off(&vt);
-		} else {
-			prompt(vt.ios, "\nPress [Enter] to unlock.\n");
-		}
+
+		if (!only_root)
+			as = (strcmp(as->name, root.name)) ? &root : &user;
 
 		prompt(vt.ios, "%s's password: ", as->name);
 		auth = authenticate(as, buf);
