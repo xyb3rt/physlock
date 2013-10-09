@@ -135,7 +135,6 @@ int main(int argc, char **argv) {
 			set_sysrq_state(SYSRQ_PATH, 0);
 	}
 
-	get_uname(&root, 0);
 	if (options->user) {
 		user.name = options->user;
 	} else {
@@ -143,6 +142,7 @@ int main(int argc, char **argv) {
 		get_uname(&user, uid);
 	}
 
+	get_uname(&root, 0);
 	get_pwhash(&root);
 	only_root = strcmp(user.name, root.name) == 0;
 	if (!only_root) {
