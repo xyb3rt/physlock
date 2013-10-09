@@ -50,6 +50,7 @@ void cleanup() {
 		unlock_vt_switch();
 		release_vt(&vt, oldvt);
 		vt_destroy();
+		memset(buf, 0, sizeof(buf));
 	}
 }
 
@@ -189,7 +190,6 @@ int main(int argc, char **argv) {
 			sleep(AUTH_FAIL_TIMEOUT);
 		}
 	}
-
 	cleanup();
 
 	return 0;
