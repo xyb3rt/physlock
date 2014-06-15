@@ -43,5 +43,5 @@ The following command-line arguments are supported:
     -h       print short usage help and exit
     -l       only lock console switching
     -L       only enable console switching
-    -v       print version information and exit
     -u USER  allow the given user to unlock the computer
+    -v       print version information and exit
