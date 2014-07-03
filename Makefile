@@ -1,6 +1,6 @@
 all: physlock
 
-VERSION = git-20140615
+VERSION = git-20140704
 
 CC      = gcc
 PREFIX  = /usr/local
@@ -25,3 +25,7 @@ install: all
 
 clean:
 	rm -f physlock $(OBJ)
+
+uninstall:
+	rm -f $(DESTDIR)$(PREFIX)/bin/physlock
+	rm -f $(DESTDIR)$(PREFIX)/share/man/man1/physlock.1
