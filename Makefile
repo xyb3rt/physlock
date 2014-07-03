@@ -25,3 +25,7 @@ install: all
 
 clean:
 	rm -f physlock $(OBJ)
+
+uninstall:
+	rm -f $(PREFIX)/bin/physlock
+	rm -f $(PREFIX)/share/man/man1/physlock.1
