@@ -116,6 +116,9 @@ int main(int argc, char **argv) {
 	setup_signal(SIGUSR1, SIG_IGN);
 	setup_signal(SIGUSR2, SIG_IGN);
 
+	close(0);
+	close(1);
+
 	vt_init();
 	get_current_vt(&oldvt);
 
@@ -152,17 +155,20 @@ int main(int argc, char **argv) {
 
 	acquire_new_vt(&vt);
 	lock_vt_switch();
-	secure_vt(&vt);
 
 	if (options->detach) {
 		chpid = fork();
-		if (chpid < 0)
+		if (chpid < 0) {
 			die("could not spawn background process: %s", strerror(errno));
-		else if (chpid > 0)
+		} else if (chpid > 0) {
 			return 0;
-		else
+		} else {
 			setsid();
+			sleep(1); /* w/o this, accessing the vt might fail */
+			reopen_vt(&vt);
+		}
 	}
+	secure_vt(&vt);
 
 	while (!auth) {
 		as = &root;

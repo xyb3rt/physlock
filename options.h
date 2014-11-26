@@ -29,9 +29,6 @@ typedef struct options_s {
 
 extern const options_t *options;
 
-void print_usage();
-void print_version();
-
 void parse_options(int, char**);
 
 #endif /* OPTIONS_H */

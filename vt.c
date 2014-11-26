@@ -75,7 +75,7 @@ void acquire_new_vt(vt_t *vt) {
 	snprintf(filename, FNAME_LEN, "%s%d", TTY_DEVICE_BASE, vt->nr);
 	vt->ios = fopen(filename, "r+");
 	if (vt->ios == NULL)
-		die("could not open file %s: %s", filename, strerror(errno));
+		die("could not open %s: %s", filename, strerror(errno));
 	vt->fd = fileno(vt->ios);
 
 	if (ioctl(fd, VT_ACTIVATE, vt->nr) < 0 ||
@@ -84,6 +84,16 @@ void acquire_new_vt(vt_t *vt) {
 
 	tcgetattr(vt->fd, &vt->term);
 	vt->rlflag = vt->term.c_lflag;
+}
+
+void reopen_vt(vt_t *vt) {
+	if (vt->nr < 0)
+		die("reopen_vt() called without acquire_new_vt()");
+	vt->fd = -1;
+	vt->ios = freopen(filename, "r+", vt->ios);
+	if (vt->ios == NULL)
+		die("could not open %s: %s", filename, strerror(errno));
+	vt->fd = fileno(vt->ios);
 }
 
 void release_vt(vt_t *vt, int nr) {

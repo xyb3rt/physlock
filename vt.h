@@ -35,6 +35,7 @@ void vt_destroy();
 
 void get_current_vt(int*);
 void acquire_new_vt(vt_t*);
+void reopen_vt(vt_t*);
 void release_vt(vt_t*, int);
 
 void lock_vt_switch();
