@@ -1,21 +1,24 @@
+VERSION  := git-20150110
+
+CC       ?= gcc
+PREFIX   := /usr/local
+CFLAGS   += -Wall -pedantic
+CPPFLAGS += -DVERSION=\"$(VERSION)\"
+LDFLAGS  +=
+LIBS     := -lcrypt
+
+.PHONY: clean install uninstall
+
+SRC := auth.c main.c options.c util.c vt.c
+OBJ := $(SRC:.c=.o)
+
 all: physlock
 
-VERSION = 0.4.5
-
-CC      = gcc
-PREFIX  = /usr/local
-CFLAGS  = -Wall -pedantic -DVERSION=\"$(VERSION)\"
-LDFLAGS =
-LIBS    = -lcrypt
-
-SRC = auth.c main.c options.c util.c vt.c
-OBJ = $(SRC:.c=.o)
-
-physlock:	$(OBJ)
+physlock: $(OBJ)
 	$(CC) $(LDFLAGS) -o $@ $^ $(LIBS)
 
 .c.o: Makefile
-	$(CC) $(CFLAGS) -c -o $@ $<
+	$(CC) $(CFLAGS) $(CPPFLAGS) -c -o $@ $<
 
 install: all
 	install -D -m 4755 -o root -g root physlock $(DESTDIR)$(PREFIX)/bin/physlock
