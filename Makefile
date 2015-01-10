@@ -2,10 +2,10 @@ all: physlock
 
 VERSION = 0.4.5
 
-CC      = gcc
+CC      ?= gcc
 PREFIX  = /usr/local
-CFLAGS  = -Wall -pedantic -DVERSION=\"$(VERSION)\"
-LDFLAGS =
+CFLAGS  += -Wall -pedantic -DVERSION=\"$(VERSION)\"
+LDFLAGS +=
 LIBS    = -lcrypt
 
 SRC = auth.c main.c options.c util.c vt.c
