@@ -10,15 +10,20 @@ LIBS     := -lcrypt
 .PHONY: clean install uninstall
 
 SRC := auth.c main.c options.c util.c vt.c
+DEP := $(SRC:.c=.d)
 OBJ := $(SRC:.c=.o)
 
 all: physlock
 
+$(OBJ): Makefile
+
+-include $(DEP)
+
 physlock: $(OBJ)
 	$(CC) $(LDFLAGS) -o $@ $^ $(LIBS)
 
-.c.o: Makefile
-	$(CC) $(CFLAGS) $(CPPFLAGS) -c -o $@ $<
+%.o: %.c
+	$(CC) $(CFLAGS) $(CPPFLAGS) -MMD -MP -c -o $@ $<
 
 install: all
 	install -D -m 4755 -o root -g root physlock $(DESTDIR)$(PREFIX)/bin/physlock
@@ -27,7 +32,7 @@ install: all
 	chmod 644 $(DESTDIR)$(PREFIX)/share/man/man1/physlock.1
 
 clean:
-	rm -f physlock $(OBJ)
+	rm -f physlock $(DEP) $(OBJ)
 
 uninstall:
 	rm -f $(DESTDIR)$(PREFIX)/bin/physlock

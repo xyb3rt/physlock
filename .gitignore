@@ -1,5 +1,3 @@
+*.d
 *.o
 physlock
-cscope.out
-release
-tags
