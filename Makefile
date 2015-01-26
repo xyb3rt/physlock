@@ -1,7 +1,7 @@
 VERSION  := git-20150110
 
 CC       ?= gcc
-PREFIX   := /usr/local
+PREFIX   ?= /usr/local
 CFLAGS   += -Wall -pedantic
 CPPFLAGS += -DVERSION=\"$(VERSION)\"
 LDFLAGS  +=
