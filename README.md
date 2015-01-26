@@ -21,7 +21,7 @@ path of the executable will be "/usr/local/sbin/physlock".
 You can install it into a directory of your choice by changing the second
 command to:
 
-    # PREFIX="/your/dir" make install
+    # make PREFIX="/your/dir" install
 
 Please also note, that the physlock executable will have root ownership and the
 setuid bit set.
