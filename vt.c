@@ -103,7 +103,7 @@ void release_vt(vt_t *vt, int nr) {
 		die("release_vt() called with invalid argument");
 	if (ioctl(fd, VT_ACTIVATE, nr) < 0 ||
 			ioctl(fd, VT_WAITACTIVE, nr) < 0)
-		die("could not activate console # %d: %s", vt->nr, strerror(errno));
+		die("could not activate console # %d: %s", nr, strerror(errno));
 
 	if (vt->ios != NULL) {
 		fclose(vt->ios);
