@@ -38,6 +38,7 @@ static char buf[BUFLEN];
 static int oldvt;
 static vt_t vt;
 static int oldsysrq;
+static int oldprintk;
 
 void cleanup() {
 	static int in = 0;
@@ -45,6 +46,8 @@ void cleanup() {
 	if (!in++) {
 		if (oldsysrq > 0)
 			set_sysrq_state(SYSRQ_PATH, oldsysrq);
+		if (oldprintk > 1)
+			set_printk_console(PRINTK_PATH, oldprintk);
 		if (vt.fd >= 0)
 			reset_vt(&vt);
 		unlock_vt_switch();
@@ -99,7 +102,7 @@ int main(int argc, char **argv) {
 	uid_t uid;
 	userinfo_t *as, root, user;
 
-	oldvt = oldsysrq = vt.nr = vt.fd = -1;
+	oldvt = oldsysrq = oldprintk = vt.nr = vt.fd = -1;
 	vt.ios = NULL;
 
 	parse_options(argc, argv);
@@ -136,6 +139,12 @@ int main(int argc, char **argv) {
 		oldsysrq = get_sysrq_state(SYSRQ_PATH);
 		if (oldsysrq > 0)
 			set_sysrq_state(SYSRQ_PATH, 0);
+	}
+
+	if (options->mute_kernel_messages) {
+		oldprintk = get_printk_console(PRINTK_PATH);
+		if (oldprintk > 1)
+			set_printk_console(PRINTK_PATH, 1);
 	}
 
 	if (options->user) {

@@ -103,3 +103,49 @@ void set_sysrq_state(const char *path, int new_state) {
 
 	fclose(ctl_file);
 }
+
+int get_printk_console(const char *path) {
+	char buf[BUFLEN], *end;
+	int len, level;
+	FILE *ctl_file;
+
+	if (!path)
+		return -1;
+
+	ctl_file = fopen(path, "r");
+	if (ctl_file == NULL)
+		die("could not open file: %s", path);
+
+	len = fread(buf, 1, BUFLEN - 1, ctl_file);
+	if (ferror(ctl_file))
+		die("could not read file: %s: %s", path, strerror(errno));
+
+	fclose(ctl_file);
+
+	buf[len] = '\0';
+	level = strtol(buf, &end, 0);
+	if (*end && *end != '\t')
+		die("invalid file content: %s: %s", path, buf);
+
+	return level;
+}
+
+void set_printk_console(const char *path, int new_level) {
+	char buf[BUFLEN];
+	FILE *ctl_file;
+
+	if (!path)
+		return;
+
+	ctl_file = fopen(path, "w+");
+	if (ctl_file == NULL)
+		die("could not open file: %s", path);
+
+	snprintf(buf, BUFLEN, "%d\n", new_level);
+
+	fwrite(buf, 1, strlen(buf), ctl_file);
+	if (ferror(ctl_file))
+		die("could not write file: %s: %s", path, strerror(errno));
+
+	fclose(ctl_file);
+}
