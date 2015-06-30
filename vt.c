@@ -63,6 +63,8 @@ void get_current_vt(int *nr) {
 }
 
 void acquire_new_vt(vt_t *vt) {
+	int ret;
+
 	vt->nr = -1;
 	vt->ios = NULL;
 	vt->fd = -1;
@@ -78,9 +80,11 @@ void acquire_new_vt(vt_t *vt) {
 		die("could not open %s: %s", filename, strerror(errno));
 	vt->fd = fileno(vt->ios);
 
-	if (ioctl(fd, VT_ACTIVATE, vt->nr) == -1 ||
-			ioctl(fd, VT_WAITACTIVE, vt->nr) == -1)
+	if (ioctl(fd, VT_ACTIVATE, vt->nr) == -1)
 		die("could not activate console # %d: %s", vt->nr, strerror(errno));
+	while ((ret = ioctl(fd, VT_WAITACTIVE, vt->nr)) == -1 && errno == EINTR);
+	if (ret == -1)
+		die("could not wait for console # %d: %s", vt->nr, strerror(errno));
 
 	tcgetattr(vt->fd, &vt->term);
 	vt->rlflag = vt->term.c_lflag;
@@ -97,13 +101,18 @@ void reopen_vt(vt_t *vt) {
 }
 
 void release_vt(vt_t *vt, int nr) {
+	int ret;
+
 	if (fd < 0)
 		die("release_vt() called without vt_init()");
 	if (nr <= 0)
 		die("release_vt() called with invalid argument");
-	if (ioctl(fd, VT_ACTIVATE, nr) == -1 ||
-			ioctl(fd, VT_WAITACTIVE, nr) == -1)
+
+	if (ioctl(fd, VT_ACTIVATE, nr) == -1)
 		die("could not activate console # %d: %s", nr, strerror(errno));
+	while ((ret = ioctl(fd, VT_WAITACTIVE, nr)) == -1 && errno == EINTR);
+	if (ret == -1)
+		die("could not wait for console # %d: %s", nr, strerror(errno));
 
 	if (vt->ios != NULL) {
 		fclose(vt->ios);
