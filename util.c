@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
+#include <assert.h>
 
 #include "util.h"
 
@@ -58,25 +59,65 @@ void die(const char *fmt, ...) {
 	exit(1);
 }
 
-int get_sysrq_state(const char *path) {
-	char buf[BUFLEN], *end;
-	int len, state;
+/*
+ * Read a file to a buffer.
+ * The buffer is ensured to be NULL-terminated.
+ * The call always succeeds (it dies() on failure).
+ * Returns the number of characters read.
+ */
+static size_t read_file(const char *path, char *buf, size_t len) {
 	FILE *ctl_file;
+	int nread;
 
-	if (!path)
-		return -1;
+	assert(path != NULL);
 
 	ctl_file = fopen(path, "r");
 	if (ctl_file == NULL)
-		die("could not open file: %s", path);
+		die("could not open file: %s: %s", path, strerror(errno));
 
-	len = fread(buf, 1, BUFLEN - 1, ctl_file);
+	nread = fread(buf, 1, len - 1, ctl_file);
 	if (ferror(ctl_file))
 		die("could not read file: %s: %s", path, strerror(errno));
 
-	fclose(ctl_file);
+	if (fclose(ctl_file) != 0)
+		die("could not close file: %s: %s", path, strerror(errno));
 
-	buf[len] = '\0';
+	buf[nread] = '\0';
+
+	return nread;
+}
+
+/*
+ * Write a buffer into a file.
+ * The call always succeeds (it dies() on failure).
+ * Returns the number of characters written.
+ */
+static size_t write_file(const char *path, char *buf, size_t len) {
+	FILE *ctl_file;
+	int nwritten;
+
+	assert(path != NULL);
+
+	ctl_file = fopen(path, "w+");
+	if (ctl_file == NULL)
+		die("could not open file: %s: %s", path, strerror(errno));
+
+	nwritten = fwrite(buf, 1, len, ctl_file);
+	if (ferror(ctl_file))
+		die("could not write file: %s: %s", path, strerror(errno));
+
+	if (fclose(ctl_file) != 0)
+		die("could not close file: %s: %s", path, strerror(errno));
+
+	return nwritten;
+}
+
+int get_sysrq_state(const char *path) {
+	char buf[BUFLEN], *end;
+	int state;
+
+	read_file(path, buf, BUFLEN);
+
 	state = strtol(buf, &end, 0);
 	if (*end && *end != '\n')
 		die("invalid file content: %s: %s", path, buf);
@@ -86,43 +127,17 @@ int get_sysrq_state(const char *path) {
 
 void set_sysrq_state(const char *path, int new_state) {
 	char buf[BUFLEN];
-	FILE *ctl_file;
-
-	if (!path)
-		return;
-
-	ctl_file = fopen(path, "w+");
-	if (ctl_file == NULL)
-		die("could not open file: %s", path);
 
 	snprintf(buf, BUFLEN, "%d\n", new_state);
-
-	fwrite(buf, 1, strlen(buf), ctl_file);
-	if (ferror(ctl_file))
-		die("could not write file: %s: %s", path, strerror(errno));
-
-	fclose(ctl_file);
+	write_file(path, buf, strlen(buf));
 }
 
 int get_printk_console(const char *path) {
 	char buf[BUFLEN], *end;
-	int len, level;
-	FILE *ctl_file;
+	int level;
 
-	if (!path)
-		return -1;
+	read_file(path, buf, BUFLEN);
 
-	ctl_file = fopen(path, "r");
-	if (ctl_file == NULL)
-		die("could not open file: %s", path);
-
-	len = fread(buf, 1, BUFLEN - 1, ctl_file);
-	if (ferror(ctl_file))
-		die("could not read file: %s: %s", path, strerror(errno));
-
-	fclose(ctl_file);
-
-	buf[len] = '\0';
 	level = strtol(buf, &end, 0);
 	if (*end && *end != '\t')
 		die("invalid file content: %s: %s", path, buf);
@@ -132,20 +147,7 @@ int get_printk_console(const char *path) {
 
 void set_printk_console(const char *path, int new_level) {
 	char buf[BUFLEN];
-	FILE *ctl_file;
-
-	if (!path)
-		return;
-
-	ctl_file = fopen(path, "w+");
-	if (ctl_file == NULL)
-		die("could not open file: %s", path);
 
 	snprintf(buf, BUFLEN, "%d\n", new_level);
-
-	fwrite(buf, 1, strlen(buf), ctl_file);
-	if (ferror(ctl_file))
-		die("could not write file: %s: %s", path, strerror(errno));
-
-	fclose(ctl_file);
+	write_file(path, buf, strlen(buf));
 }
