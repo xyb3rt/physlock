@@ -112,42 +112,46 @@ static size_t write_file(const char *path, char *buf, size_t len) {
 	return nwritten;
 }
 
-int get_sysrq_state(const char *path) {
+/*
+ * Read integer from file, and ensure the next character is as expected.
+ * The call always succeeds (it dies() on failure).
+ */
+static int read_int_from_file(const char *path, char ending_char) {
 	char buf[BUFLEN], *end;
-	int state;
+	int value;
 
 	read_file(path, buf, BUFLEN);
 
-	state = strtol(buf, &end, 0);
-	if (*end && *end != '\n')
+	value = strtol(buf, &end, 0);
+	if (*end && *end != ending_char)
 		die("invalid file content: %s: %s", path, buf);
 
-	return state;
+	return value;
+}
+
+/*
+ * Write integer to file.
+ * The call always succeeds (it dies() on failure).
+ */
+static void write_int_to_file(const char *path, int value) {
+	char buf[BUFLEN];
+
+	snprintf(buf, BUFLEN, "%d\n", value);
+	write_file(path, buf, strlen(buf));
+}
+
+int get_sysrq_state(const char *path) {
+	return read_int_from_file(path, '\n');
 }
 
 void set_sysrq_state(const char *path, int new_state) {
-	char buf[BUFLEN];
-
-	snprintf(buf, BUFLEN, "%d\n", new_state);
-	write_file(path, buf, strlen(buf));
+	write_int_to_file(path, new_state);
 }
 
 int get_printk_console(const char *path) {
-	char buf[BUFLEN], *end;
-	int level;
-
-	read_file(path, buf, BUFLEN);
-
-	level = strtol(buf, &end, 0);
-	if (*end && *end != '\t')
-		die("invalid file content: %s: %s", path, buf);
-
-	return level;
+	return read_int_from_file(path, '\t');
 }
 
 void set_printk_console(const char *path, int new_level) {
-	char buf[BUFLEN];
-
-	snprintf(buf, BUFLEN, "%d\n", new_level);
-	write_file(path, buf, strlen(buf));
+	write_int_to_file(path, new_level);
 }
