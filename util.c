@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
+#include <assert.h>
 
 #include "util.h"
 
@@ -58,48 +59,99 @@ void die(const char *fmt, ...) {
 	exit(1);
 }
 
-int get_sysrq_state(const char *path) {
-	char buf[BUFLEN], *end;
-	int len, state;
+/*
+ * Read a file to a buffer.
+ * The buffer is ensured to be NULL-terminated.
+ * The call always succeeds (it dies() on failure).
+ * Returns the number of characters read.
+ */
+static size_t read_file(const char *path, char *buf, size_t len) {
 	FILE *ctl_file;
+	int nread;
 
-	if (!path)
-		return -1;
+	assert(path != NULL);
 
 	ctl_file = fopen(path, "r");
 	if (ctl_file == NULL)
-		die("could not open file: %s", path);
+		die("could not open file: %s: %s", path, strerror(errno));
 
-	len = fread(buf, 1, BUFLEN - 1, ctl_file);
+	nread = fread(buf, 1, len - 1, ctl_file);
 	if (ferror(ctl_file))
 		die("could not read file: %s: %s", path, strerror(errno));
 
-	fclose(ctl_file);
+	if (fclose(ctl_file) != 0)
+		die("could not close file: %s: %s", path, strerror(errno));
 
-	buf[len] = '\0';
-	state = strtol(buf, &end, 0);
-	if (*end && *end != '\n')
-		die("invalid file content: %s: %s", path, buf);
+	buf[nread] = '\0';
 
-	return state;
+	return nread;
 }
 
-void set_sysrq_state(const char *path, int new_state) {
-	char buf[BUFLEN];
+/*
+ * Write a buffer into a file.
+ * The call always succeeds (it dies() on failure).
+ * Returns the number of characters written.
+ */
+static size_t write_file(const char *path, char *buf, size_t len) {
 	FILE *ctl_file;
+	int nwritten;
 
-	if (!path)
-		return;
+	assert(path != NULL);
 
 	ctl_file = fopen(path, "w+");
 	if (ctl_file == NULL)
-		die("could not open file: %s", path);
+		die("could not open file: %s: %s", path, strerror(errno));
 
-	snprintf(buf, BUFLEN, "%d\n", new_state);
-
-	fwrite(buf, 1, strlen(buf), ctl_file);
+	nwritten = fwrite(buf, 1, len, ctl_file);
 	if (ferror(ctl_file))
 		die("could not write file: %s: %s", path, strerror(errno));
 
-	fclose(ctl_file);
+	if (fclose(ctl_file) != 0)
+		die("could not close file: %s: %s", path, strerror(errno));
+
+	return nwritten;
+}
+
+/*
+ * Read integer from file, and ensure the next character is as expected.
+ * The call always succeeds (it dies() on failure).
+ */
+static int read_int_from_file(const char *path, char ending_char) {
+	char buf[BUFLEN], *end;
+	int value;
+
+	read_file(path, buf, BUFLEN);
+
+	value = strtol(buf, &end, 0);
+	if (*end && *end != ending_char)
+		die("invalid file content: %s: %s", path, buf);
+
+	return value;
+}
+
+/*
+ * Write integer to file.
+ * The call always succeeds (it dies() on failure).
+ */
+static void write_int_to_file(const char *path, int value) {
+	char buf[BUFLEN];
+
+	snprintf(buf, BUFLEN, "%d\n", value);
+	write_file(path, buf, strlen(buf));
+}
+
+int get_sysrq_state(const char *path) {
+	return read_int_from_file(path, '\n');
+}
+
+void set_sysrq_state(const char *path, int new_state) {
+	write_int_to_file(path, new_state);
+}
+
+int get_printk_console(const char *path) {
+	return read_int_from_file(path, '\t');
+}
+
+void set_printk_console(const char *path, int new_level) {
+	write_int_to_file(path, new_level);
 }

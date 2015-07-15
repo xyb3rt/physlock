@@ -3,7 +3,7 @@
 physlock \- lock all consoles / virtual terminals
 .SH SYNOPSIS
 .B physlock
-.RB [ \-dhLlsv ]
+.RB [ \-dhLlmsv ]
 .RB [ \-u
 .IR USER ]
 .SH DESCRIPTION
@@ -35,6 +35,9 @@ Only lock console switching and exit.
 Only enable (unlock) console switching and exit. This is useful when a prior
 instance of physlock has crashed and leaved the console switching mechanism
 locked.
+.TP
+.B \-m
+Mute kernel messages on console while physlock is runnning.
 .TP
 .B \-s
 Disable SysRq mechanism while physlock is running.
