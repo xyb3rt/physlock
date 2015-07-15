@@ -22,7 +22,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
-#include <assert.h>
 
 #include "util.h"
 
@@ -65,11 +64,9 @@ void die(const char *fmt, ...) {
  * The call always succeeds (it dies() on failure).
  * Returns the number of characters read.
  */
-static size_t read_file(const char *path, char *buf, size_t len) {
+size_t read_file(const char *path, char *buf, size_t len) {
 	FILE *ctl_file;
-	int nread;
-
-	assert(path != NULL);
+	size_t nread;
 
 	ctl_file = fopen(path, "r");
 	if (ctl_file == NULL)
@@ -79,9 +76,7 @@ static size_t read_file(const char *path, char *buf, size_t len) {
 	if (ferror(ctl_file))
 		die("could not read file: %s: %s", path, strerror(errno));
 
-	if (fclose(ctl_file) != 0)
-		die("could not close file: %s: %s", path, strerror(errno));
-
+	fclose(ctl_file);
 	buf[nread] = '\0';
 
 	return nread;
@@ -92,11 +87,9 @@ static size_t read_file(const char *path, char *buf, size_t len) {
  * The call always succeeds (it dies() on failure).
  * Returns the number of characters written.
  */
-static size_t write_file(const char *path, char *buf, size_t len) {
+size_t write_file(const char *path, char *buf, size_t len) {
 	FILE *ctl_file;
-	int nwritten;
-
-	assert(path != NULL);
+	size_t nwritten;
 
 	ctl_file = fopen(path, "w+");
 	if (ctl_file == NULL)
@@ -106,8 +99,7 @@ static size_t write_file(const char *path, char *buf, size_t len) {
 	if (ferror(ctl_file))
 		die("could not write file: %s: %s", path, strerror(errno));
 
-	if (fclose(ctl_file) != 0)
-		die("could not close file: %s: %s", path, strerror(errno));
+	fclose(ctl_file);
 
 	return nwritten;
 }
@@ -116,7 +108,7 @@ static size_t write_file(const char *path, char *buf, size_t len) {
  * Read integer from file, and ensure the next character is as expected.
  * The call always succeeds (it dies() on failure).
  */
-static int read_int_from_file(const char *path, char ending_char) {
+int read_int_from_file(const char *path, char ending_char) {
 	char buf[BUFLEN], *end;
 	int value;
 
@@ -133,25 +125,10 @@ static int read_int_from_file(const char *path, char ending_char) {
  * Write integer to file.
  * The call always succeeds (it dies() on failure).
  */
-static void write_int_to_file(const char *path, int value) {
+void write_int_to_file(const char *path, int value) {
 	char buf[BUFLEN];
 
 	snprintf(buf, BUFLEN, "%d\n", value);
 	write_file(path, buf, strlen(buf));
 }
 
-int get_sysrq_state(const char *path) {
-	return read_int_from_file(path, '\n');
-}
-
-void set_sysrq_state(const char *path, int new_state) {
-	write_int_to_file(path, new_state);
-}
-
-int get_printk_console(const char *path) {
-	return read_int_from_file(path, '\t');
-}
-
-void set_printk_console(const char *path, int new_level) {
-	write_int_to_file(path, new_level);
-}

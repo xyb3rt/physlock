@@ -24,10 +24,7 @@
 void warn(const char*, ...);
 void die(const char*, ...);
 
-int get_sysrq_state(const char*);
-void set_sysrq_state(const char*, int);
-
-int get_printk_console(const char*);
-void set_printk_console(const char*, int);
+int read_int_from_file(const char*, char);
+void write_int_to_file(const char*, int);
 
 #endif /* UTIL_H */
