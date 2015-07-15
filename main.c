@@ -45,9 +45,9 @@ void cleanup() {
 
 	if (!in++) {
 		if (oldsysrq > 0)
-			set_sysrq_state(SYSRQ_PATH, oldsysrq);
+			write_int_to_file(SYSRQ_PATH, oldsysrq);
 		if (oldprintk > 1)
-			set_printk_console(PRINTK_PATH, oldprintk);
+			write_int_to_file(PRINTK_PATH, oldprintk);
 		if (vt.fd >= 0)
 			reset_vt(&vt);
 		unlock_vt_switch();
@@ -136,15 +136,15 @@ int main(int argc, char **argv) {
 	}
 
 	if (options->disable_sysrq) {
-		oldsysrq = get_sysrq_state(SYSRQ_PATH);
+		oldsysrq = read_int_from_file(SYSRQ_PATH, '\n');
 		if (oldsysrq > 0)
-			set_sysrq_state(SYSRQ_PATH, 0);
+			write_int_to_file(SYSRQ_PATH, 0);
 	}
 
 	if (options->mute_kernel_messages) {
-		oldprintk = get_printk_console(PRINTK_PATH);
+		oldprintk = read_int_from_file(PRINTK_PATH, '\t');
 		if (oldprintk > 1)
-			set_printk_console(PRINTK_PATH, 1);
+			write_int_to_file(PRINTK_PATH, 1);
 	}
 
 	if (options->user) {
