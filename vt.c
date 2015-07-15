@@ -57,7 +57,7 @@ void get_current_vt(int *nr) {
 	if (fd < 0)
 		die("get_current_vt() called without vt_init()");
 
-	if (ioctl(fd, VT_GETSTATE, &vtstat) < 0)
+	if (ioctl(fd, VT_GETSTATE, &vtstat) == -1)
 		die("could not get state of active console: %s", strerror(errno));
 	*nr = vtstat.v_active;
 }
@@ -69,7 +69,7 @@ void acquire_new_vt(vt_t *vt) {
 
 	if (fd < 0)
 		die("acquire_new_vt() called without vt_init()");
-	if (ioctl(fd, VT_OPENQRY, &vt->nr) < 0)
+	if (ioctl(fd, VT_OPENQRY, &vt->nr) == -1)
 		die("could not open new console: %s", strerror(errno));
 
 	snprintf(filename, FNAME_LEN, "%s%d", TTY_DEVICE_BASE, vt->nr);
@@ -78,8 +78,8 @@ void acquire_new_vt(vt_t *vt) {
 		die("could not open %s: %s", filename, strerror(errno));
 	vt->fd = fileno(vt->ios);
 
-	if (ioctl(fd, VT_ACTIVATE, vt->nr) < 0 ||
-			ioctl(fd, VT_WAITACTIVE, vt->nr) < 0)
+	if (ioctl(fd, VT_ACTIVATE, vt->nr) == -1 ||
+			ioctl(fd, VT_WAITACTIVE, vt->nr) == -1)
 		die("could not activate console # %d: %s", vt->nr, strerror(errno));
 
 	tcgetattr(vt->fd, &vt->term);
@@ -101,8 +101,8 @@ void release_vt(vt_t *vt, int nr) {
 		die("release_vt() called without vt_init()");
 	if (nr <= 0)
 		die("release_vt() called with invalid argument");
-	if (ioctl(fd, VT_ACTIVATE, nr) < 0 ||
-			ioctl(fd, VT_WAITACTIVE, nr) < 0)
+	if (ioctl(fd, VT_ACTIVATE, nr) == -1 ||
+			ioctl(fd, VT_WAITACTIVE, nr) == -1)
 		die("could not activate console # %d: %s", nr, strerror(errno));
 
 	if (vt->ios != NULL) {
@@ -112,7 +112,7 @@ void release_vt(vt_t *vt, int nr) {
 	}
 
 	if (vt->nr > 0) {
-		if (ioctl(fd, VT_DISALLOCATE, vt->nr) < 0)
+		if (ioctl(fd, VT_DISALLOCATE, vt->nr) == -1)
 			die("could not deallocate console # %d: %s", vt->nr, strerror(errno));
 		vt->nr = -1;
 	}
@@ -121,14 +121,14 @@ void release_vt(vt_t *vt, int nr) {
 void lock_vt_switch() {
 	if (fd < 0)
 		die("lock_vt_switch() called without vt_init()");
-	if (ioctl(fd, VT_LOCKSWITCH, 1) < 0)
+	if (ioctl(fd, VT_LOCKSWITCH, 1) == -1)
 		die("could not lock console switching: %s", strerror(errno));
 }
 
 void unlock_vt_switch() {
 	if (fd < 0)
 		die("unlock_vt_switch() called without vt_init()");
-	if (ioctl(fd, VT_UNLOCKSWITCH, 1) < 0)
+	if (ioctl(fd, VT_UNLOCKSWITCH, 1) == -1)
 		die("could not enable console switching: %s", strerror(errno));
 }
 
