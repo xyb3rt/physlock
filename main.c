@@ -147,6 +147,7 @@ int main(int argc, char **argv) {
 
 	get_uname(&root, 0);
 	get_pwhash(&root);
+	authenticate(&root, ""); /* test authentication */
 	only_root = strcmp(user.name, root.name) == 0;
 	if (!only_root) {
 		get_pwhash(&user);
