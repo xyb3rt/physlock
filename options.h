@@ -25,7 +25,6 @@ typedef struct options_s {
 	int mute_kernel_messages;
 	int only_lock;
 	int only_unlock;
-	const char *user;
 } options_t;
 
 extern const options_t *options;

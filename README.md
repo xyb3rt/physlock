@@ -33,8 +33,8 @@ Usage
 -----
 The behaviour of physlock is completely controlled via command-line arguments,
 it does not rely on environment variables.
-It always allows unlocking as root and as a specified user. If no username is
-given on the command line, then physlock uses the name of the calling user.
+physlock uses the utmp file to identify the owner of the current session (i.e.
+active tty) and only allows her to unlock the computer.
 
 The following command-line arguments are supported:
 
@@ -45,5 +45,4 @@ The following command-line arguments are supported:
     -L       only enable console switching
     -m       mute kernel messages on console while physlock is running
     -s       disable sysrq key while physlock is running
-    -u USER  allow the given user to unlock the computer
     -v       print version information and exit

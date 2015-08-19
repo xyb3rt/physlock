@@ -4,8 +4,6 @@ physlock \- lock all consoles / virtual terminals
 .SH SYNOPSIS
 .B physlock
 .RB [ \-dhLlmsv ]
-.RB [ \-u
-.IR USER ]
 .SH DESCRIPTION
 physlock is an alternative to vlock, it is equivalent to `vlock \-an'. It is
 written because vlock blocks some linux kernel mechanisms like hibernate and
@@ -16,8 +14,8 @@ API.
 .P
 The behaviour of physlock is completely controlled via command-line arguments,
 it does not rely on environment variables.
-It always allows unlocking as root and as a specified user. If no username is
-given on the command line, then physlock uses the name of the calling user.
+physlock uses the utmp file to identify the owner of the current session (i.e.
+active tty) and only allows her to unlock the computer.
 .SH OPTIONS
 .TP
 .B \-d
@@ -41,10 +39,6 @@ Mute kernel messages on console while physlock is runnning.
 .TP
 .B \-s
 Disable SysRq mechanism while physlock is running.
-.TP
-.B \-u USER
-Allow the given user to unlock the computer. Using this option prevents physlock
-from using the name of the calling user.
 .TP
 .B \-v
 Print version information to standard output and exit.

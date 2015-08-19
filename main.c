@@ -98,9 +98,8 @@ void prompt(FILE *stream, const char *fmt, ...) {
 }
 
 int main(int argc, char **argv) {
-	int only_root, auth = 0, chpid;
-	uid_t uid;
-	userinfo_t *as, root, user;
+	int auth = 0;
+	userinfo_t user;
 
 	oldvt = oldsysrq = oldprintk = vt.nr = vt.fd = -1;
 	vt.ios = NULL;
@@ -147,27 +146,14 @@ int main(int argc, char **argv) {
 			write_int_to_file(PRINTK_PATH, 1);
 	}
 
-	if (options->user) {
-		user.name = options->user;
-	} else {
-		uid = getuid();
-		get_uname(&user, uid);
-	}
-
-	get_uname(&root, 0);
-	get_pwhash(&root);
-	authenticate(&root, ""); /* test authentication */
-	only_root = strcmp(user.name, root.name) == 0;
-	if (!only_root) {
-		get_pwhash(&user);
-		authenticate(&user, ""); /* test authentication */
-	}
+	get_user(&user, oldvt);
+	authenticate(&user, ""); /* test authentication */
 
 	acquire_new_vt(&vt);
 	lock_vt_switch();
 
 	if (options->detach) {
-		chpid = fork();
+		int chpid = fork();
 		if (chpid < 0) {
 			die("could not spawn background process: %s", strerror(errno));
 		} else if (chpid > 0) {
@@ -181,29 +167,12 @@ int main(int argc, char **argv) {
 	secure_vt(&vt);
 
 	while (!auth) {
-		as = &root;
 		flush_vt(&vt);
-		if (!only_root) {
-			tty_echo_on(&vt);
-			while (1) {
-				prompt(vt.ios, "\nUnlock as [%s/%s]: ", user.name, root.name);
-				if (!*buf || !strcmp(buf, user.name)) {
-					as = &user;
-					break;
-				} else if (!strcmp(buf, root.name)) {
-					break;
-				}
-			}
-			tty_echo_off(&vt);
-		} else {
-			prompt(vt.ios, "\nPress [Enter] to unlock.\n");
-		}
-
-		prompt(vt.ios, "%s's password: ", as->name);
-		auth = authenticate(as, buf);
+		prompt(vt.ios, "%s's password: ", user.name);
+		auth = authenticate(&user, buf);
 		memset(buf, 0, sizeof(buf));
 		if (!auth) {
-			fprintf(vt.ios, "\nAuthentication failed\n");
+			fprintf(vt.ios, "\nAuthentication failed\n\n");
 			sleep(AUTH_FAIL_TIMEOUT);
 		}
 	}
