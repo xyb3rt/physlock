@@ -16,7 +16,7 @@ physlock is built using the commands:
 
 Please note, that the latter one requires root privileges.
 By default, physlock is installed using the prefix "/usr/local", so the full
-path of the executable will be "/usr/local/sbin/physlock".
+path of the executable will be "/usr/local/bin/physlock".
 
 You can install it into a directory of your choice by changing the second
 command to:
