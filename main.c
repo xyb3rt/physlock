@@ -81,9 +81,6 @@ void prompt(FILE *stream, const char *fmt, ...) {
 	va_list args;
 	unsigned int c, i = 0;
 
-	if (!stream || !fmt)
-		return;
-
 	va_start(args, fmt);
 	vfprintf(stream, fmt, args);
 	va_end(args);

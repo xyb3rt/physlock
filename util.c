@@ -46,15 +46,13 @@ void warn(const char *fmt, ...) {
 void die(const char *fmt, ...) {
 	va_list args;
 
-	if (!fmt)
-		return;
-
-	va_start(args, fmt);
-	fprintf(stderr, "physlock: error: ");
-	vfprintf(stderr, fmt, args);
-	fprintf(stderr, "\n");
-	va_end(args);
-
+	if (fmt) {
+		va_start(args, fmt);
+		fprintf(stderr, "physlock: error: ");
+		vfprintf(stderr, fmt, args);
+		fprintf(stderr, "\n");
+		va_end(args);
+	}
 	cleanup();
 	exit(1);
 }

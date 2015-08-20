@@ -41,7 +41,7 @@ void vt_init() {
 	fd = open(CONSOLE_DEVICE, O_RDWR);
 	if (fd < 0)
 		die("could not open console device %s: %s", CONSOLE_DEVICE,
-		      strerror(errno));
+		    strerror(errno));
 }
 
 void vt_destroy() {
@@ -53,9 +53,6 @@ void vt_destroy() {
 
 void get_current_vt(int *nr) {
 	struct vt_stat vtstat;
-
-	if (fd < 0)
-		die("get_current_vt() called without vt_init()");
 
 	if (ioctl(fd, VT_GETSTATE, &vtstat) == -1)
 		die("could not get state of active console: %s", strerror(errno));
@@ -69,8 +66,6 @@ void acquire_new_vt(vt_t *vt) {
 	vt->ios = NULL;
 	vt->fd = -1;
 
-	if (fd < 0)
-		die("acquire_new_vt() called without vt_init()");
 	if (ioctl(fd, VT_OPENQRY, &vt->nr) == -1)
 		die("could not open new console: %s", strerror(errno));
 
@@ -91,8 +86,6 @@ void acquire_new_vt(vt_t *vt) {
 }
 
 void reopen_vt(vt_t *vt) {
-	if (vt->nr < 0)
-		die("reopen_vt() called without acquire_new_vt()");
 	vt->fd = -1;
 	vt->ios = freopen(filename, "r+", vt->ios);
 	if (vt->ios == NULL)
@@ -102,11 +95,6 @@ void reopen_vt(vt_t *vt) {
 
 void release_vt(vt_t *vt, int nr) {
 	int ret;
-
-	if (fd < 0)
-		die("release_vt() called without vt_init()");
-	if (nr <= 0)
-		die("release_vt() called with invalid argument");
 
 	if (ioctl(fd, VT_ACTIVATE, nr) == -1)
 		die("could not activate console # %d: %s", nr, strerror(errno));
@@ -128,38 +116,26 @@ void release_vt(vt_t *vt, int nr) {
 }
 
 void lock_vt_switch() {
-	if (fd < 0)
-		die("lock_vt_switch() called without vt_init()");
 	if (ioctl(fd, VT_LOCKSWITCH, 1) == -1)
 		die("could not lock console switching: %s", strerror(errno));
 }
 
 void unlock_vt_switch() {
-	if (fd < 0)
-		die("unlock_vt_switch() called without vt_init()");
 	if (ioctl(fd, VT_UNLOCKSWITCH, 1) == -1)
 		die("could not enable console switching: %s", strerror(errno));
 }
 
 void secure_vt(vt_t *vt) {
-	if (vt->fd < 0)
-		die("secure_vt() called with invalid argument");
 	vt->term.c_lflag &= ~(ECHO | ISIG);
 	tcsetattr(vt->fd, TCSANOW, &vt->term);
 }
 
 void flush_vt(vt_t *vt) {
-	if (vt->fd >= 0)
-		tcflush(vt->fd, TCIFLUSH);
+	tcflush(vt->fd, TCIFLUSH);
 }
 
 void reset_vt(vt_t *vt) {
-	if (vt->fd < 0)
-		die("reset_vt() called with invalid argument");
-
-	/* clear the screen: */
-	fprintf(vt->ios, "\033[H\033[J");
-
+	fprintf(vt->ios, "\033[H\033[J"); /* clear the screen */
 	vt->term.c_lflag = vt->rlflag;
 	tcsetattr(vt->fd, TCSANOW, &vt->term);
 }

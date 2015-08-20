@@ -50,9 +50,6 @@ void get_user(userinfo_t *uinfo, int vt) {
 	struct utmp r;
 	char tty[16];
 
-	if (uinfo == NULL)
-		return;
-
 	uf = fopen(_PATH_UTMP, "r");
 	if (uf == NULL)
 		die("could not open: %s: %s", _PATH_UTMP, strerror(errno));
@@ -81,9 +78,6 @@ void get_user(userinfo_t *uinfo, int vt) {
 void get_root(userinfo_t *uinfo) {
 	struct passwd *pw;
 
-	if (uinfo == NULL)
-		return;
-
 	pw = getpwuid(0);
 	if (pw == NULL)
 		die("could not get user info for uid 0");
@@ -100,9 +94,6 @@ void get_root(userinfo_t *uinfo) {
  */
 int authenticate(const userinfo_t *uinfo, const char *pw) {
 	char *cryptpw;
-
-	if (uinfo == NULL || uinfo->pwhash == NULL || pw == NULL)
-		return -1;
 
 	cryptpw = crypt(pw, uinfo->pwhash);
 	if (cryptpw == NULL)
