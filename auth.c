@@ -17,7 +17,7 @@
  */
 
 #define _POSIX_C_SOURCE 200112L
-#define _XOPEN_SOURCE   500 /* for crypt() and strdup() */
+#define _XOPEN_SOURCE   500 /* for crypt() */
 
 #include <paths.h>
 #include <stdio.h>
@@ -31,10 +31,23 @@
 #include "auth.h"
 #include "util.h"
 
+static void get_pw(userinfo_t *uinfo) {
+	struct spwd *spw;
+
+	setspent();
+
+	spw = getspnam(uinfo->name);
+	if (spw == NULL)
+		die("could not get password hash of user %s", uinfo->name);
+
+	uinfo->pwhash = s_strdup(spw->sp_pwdp);
+
+	endspent();
+}
+
 void get_user(userinfo_t *uinfo, int vt) {
 	FILE *uf;
 	struct utmp r;
-	struct spwd *spw;
 	char tty[16];
 
 	if (uinfo == NULL)
@@ -53,9 +66,7 @@ void get_user(userinfo_t *uinfo, int vt) {
 		if (r.ut_type != USER_PROCESS || r.ut_user[0] == '\0')
 			continue;
 		if (strcmp(r.ut_line, tty) == 0) {
-			uinfo->name = strdup(r.ut_user);
-			if (uinfo->name == NULL)
-				die("could not allocate memory");
+			uinfo->name = s_strdup(r.ut_user);
 			break;
 		}
 	}
@@ -64,28 +75,38 @@ void get_user(userinfo_t *uinfo, int vt) {
 	if (uinfo->name == NULL)
 		die("could not identify active user");
 
-	setspent();
-
-	spw = getspnam(uinfo->name);
-	if (spw == NULL)
-		die("could not get password hash of user %s", uinfo->name);
-
-	uinfo->pwhash = strdup(spw->sp_pwdp);
-	if (uinfo->pwhash == NULL)
-		die("could not allocate memory");
-
-	endspent();
+	get_pw(uinfo);
 }
 
+void get_root(userinfo_t *uinfo) {
+	struct passwd *pw;
+
+	if (uinfo == NULL)
+		return;
+
+	pw = getpwuid(0);
+	if (pw == NULL)
+		die("could not get user info for uid 0");
+
+	uinfo->name = s_strdup(pw->pw_name);
+
+	get_pw(uinfo);
+}
+
+/* return value:
+ *   0: authentication successful
+ *   1: authentication failed
+ *  -1: error
+ */
 int authenticate(const userinfo_t *uinfo, const char *pw) {
 	char *cryptpw;
 
 	if (uinfo == NULL || uinfo->pwhash == NULL || pw == NULL)
-		return 0;
+		return -1;
 
 	cryptpw = crypt(pw, uinfo->pwhash);
 	if (cryptpw == NULL)
-		die("could not hash password for user %s", uinfo->name);
+		return -1;
 
-	return strcmp(cryptpw, uinfo->pwhash) == 0;
+	return strcmp(cryptpw, uinfo->pwhash) != 0;
 }

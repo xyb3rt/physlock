@@ -17,6 +17,7 @@
  */
 
 #define _POSIX_C_SOURCE 200112L
+#define _XOPEN_SOURCE   500 /* for strdup() */
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -56,6 +57,18 @@ void die(const char *fmt, ...) {
 
 	cleanup();
 	exit(1);
+}
+
+char* s_strdup(const char *s) {
+	char *d = NULL;
+
+	if (s != NULL) {
+		d = malloc(strlen(s) + 1);
+		if (d == NULL)
+			die("could not allocate memory");
+		strcpy(d, s);
+	}
+	return d;
 }
 
 /*

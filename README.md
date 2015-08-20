@@ -34,7 +34,7 @@ Usage
 The behaviour of physlock is completely controlled via command-line arguments,
 it does not rely on environment variables.
 physlock uses the utmp file to identify the owner of the current session (i.e.
-active tty) and only allows her to unlock the computer.
+active tty) and prompts for her password to unlock the computer.
 
 The following command-line arguments are supported:
 

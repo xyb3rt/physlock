@@ -98,8 +98,8 @@ void prompt(FILE *stream, const char *fmt, ...) {
 }
 
 int main(int argc, char **argv) {
-	int auth = 0;
-	userinfo_t user;
+	int try = 0, unauth = 1, user_only = 1;
+	userinfo_t root, user, *u = &user;
 
 	oldvt = oldsysrq = oldprintk = vt.nr = vt.fd = -1;
 	vt.ios = NULL;
@@ -134,6 +134,13 @@ int main(int argc, char **argv) {
 		return 0;
 	}
 
+	get_user(&user, oldvt);
+	if (authenticate(&user, "") == -1)
+		die("could not hash password for user %s", user.name);
+	get_root(&root);
+	if (strcmp(user.name, root.name) != 0 && authenticate(&root, "") != -1)
+		user_only = 0;
+
 	if (options->disable_sysrq) {
 		oldsysrq = read_int_from_file(SYSRQ_PATH, '\n');
 		if (oldsysrq > 0)
@@ -145,9 +152,6 @@ int main(int argc, char **argv) {
 		if (oldprintk > 1)
 			write_int_to_file(PRINTK_PATH, 1);
 	}
-
-	get_user(&user, oldvt);
-	authenticate(&user, ""); /* test authentication */
 
 	acquire_new_vt(&vt);
 	lock_vt_switch();
@@ -166,12 +170,16 @@ int main(int argc, char **argv) {
 	}
 	secure_vt(&vt);
 
-	while (!auth) {
+	while (unauth) {
 		flush_vt(&vt);
-		prompt(vt.ios, "%s's password: ", user.name);
-		auth = authenticate(&user, buf);
+		prompt(vt.ios, "%s's password: ", u->name);
+		unauth = authenticate(u, buf);
 		memset(buf, 0, sizeof(buf));
-		if (!auth) {
+		if (unauth) {
+			if (!user_only && (u == &root || ++try == 3)) {
+				u = u == &root ? &user : &root;
+				try = 0;
+			}
 			fprintf(vt.ios, "\nAuthentication failed\n\n");
 			sleep(AUTH_FAIL_TIMEOUT);
 		}

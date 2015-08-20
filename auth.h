@@ -27,6 +27,7 @@ typedef struct userinfo_s {
 } userinfo_t;
 
 void get_user(userinfo_t*, int);
+void get_root(userinfo_t*);
 int authenticate(const userinfo_t*, const char*);
 
 #endif /* AUTH_H */
