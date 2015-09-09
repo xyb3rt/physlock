@@ -28,6 +28,8 @@
 
 enum { BUFLEN = 32 };
 
+extern const char *progname;
+
 void cleanup();
 
 void warn(const char *fmt, ...) {
@@ -37,7 +39,7 @@ void warn(const char *fmt, ...) {
 		return;
 
 	va_start(args, fmt);
-	fprintf(stderr, "physlock: warning: ");
+	fprintf(stderr, "%s: warning: ", progname);
 	vfprintf(stderr, fmt, args);
 	fprintf(stderr, "\n");
 	va_end(args);
@@ -48,13 +50,19 @@ void die(const char *fmt, ...) {
 
 	if (fmt) {
 		va_start(args, fmt);
-		fprintf(stderr, "physlock: error: ");
+		fprintf(stderr, "%s: error: ", progname);
 		vfprintf(stderr, fmt, args);
 		fprintf(stderr, "\n");
 		va_end(args);
 	}
 	cleanup();
 	exit(1);
+}
+
+char* s_basename(char *path) {
+	char *b = strrchr(path, '/');
+
+	return b != NULL && *++b != '\0' ? b : path;
 }
 
 char* s_strdup(const char *s) {

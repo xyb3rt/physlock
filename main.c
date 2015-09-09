@@ -34,6 +34,7 @@
 
 enum { BUFLEN = 1024 };
 
+const char *progname;
 static char buf[BUFLEN];
 static int oldvt;
 static vt_t vt;
@@ -98,13 +99,14 @@ int main(int argc, char **argv) {
 	int try = 0, unauth = 1, user_only = 1;
 	userinfo_t root, user, *u = &user;
 
+	progname = s_basename(argv[0]);
 	oldvt = oldsysrq = oldprintk = vt.nr = vt.fd = -1;
 	vt.ios = NULL;
 
 	parse_options(argc, argv);
 
 	if (geteuid() != 0) {
-		fprintf(stderr, "physlock: must be root!\n");
+		fprintf(stderr, "%s: must be root!\n", progname);
 		return 1;
 	}
 

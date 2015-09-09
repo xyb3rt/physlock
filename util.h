@@ -24,6 +24,7 @@
 void warn(const char*, ...);
 void die(const char*, ...);
 
+char* s_basename(char*);
 char* s_strdup(const char*);
 
 int read_int_from_file(const char*, char);
