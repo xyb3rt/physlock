@@ -25,6 +25,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <signal.h>
+#include <syslog.h>
 
 #include "auth.h"
 #include "config.h"
@@ -54,6 +55,7 @@ void cleanup() {
 		unlock_vt_switch();
 		release_vt(&vt, oldvt);
 		vt_destroy();
+		closelog();
 		memset(buf, 0, sizeof(buf));
 	}
 }
@@ -120,6 +122,8 @@ int main(int argc, char **argv) {
 	close(0);
 	close(1);
 
+	openlog(progname, LOG_PID, LOG_AUTH);
+
 	vt_init();
 	get_current_vt(&oldvt);
 
@@ -180,6 +184,7 @@ int main(int argc, char **argv) {
 				try = 0;
 			}
 			fprintf(vt.ios, "\nAuthentication failed\n\n");
+			syslog(LOG_WARNING, "Authentication failure");
 			sleep(AUTH_FAIL_TIMEOUT);
 		}
 	}
