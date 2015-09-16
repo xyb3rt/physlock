@@ -179,14 +179,6 @@ int main(int argc, char **argv) {
 		unauth = authenticate(u, buf);
 		memset(buf, 0, sizeof(buf));
 		if (unauth) {
-			if (!user_only && (u == &root || ++try == 3)) {
-				u = u == &root ? &user : &root;
-				try = 0;
-			}
-			fprintf(vt.ios, "\nAuthentication failed\n\n");
-			syslog(LOG_WARNING, "Authentication failure");
-			sleep(AUTH_FAIL_TIMEOUT);
-		} else if(unauth == 1000) {
 			fprintf(vt.ios, "\nAuthentication failed\n\n");
 			syslog(LOG_WARNING, "Authentication failure");
 			sleep(AUTH_FAIL_TIMEOUT);
