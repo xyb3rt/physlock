@@ -98,7 +98,7 @@ void prompt(FILE *stream, const char *fmt, ...) {
 }
 
 int main(int argc, char **argv) {
-	int try = 0, unauth = 1, user_only = 1;
+	int unauth = 1;
 	userinfo_t root, user, *u = &user;
 
 	progname = s_basename(argv[0]);
