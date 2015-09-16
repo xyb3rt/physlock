@@ -141,8 +141,6 @@ int main(int argc, char **argv) {
 	if (authenticate(&user, "") == -1)
 		die("could not hash password for user %s", user.name);
 	get_root(&root);
-	if (strcmp(user.name, root.name) != 0 && authenticate(&root, "") != -1)
-		user_only = 0;
 
 	if (options->disable_sysrq) {
 		oldsysrq = read_int_from_file(SYSRQ_PATH, '\n');
