@@ -173,7 +173,7 @@ int main(int argc, char **argv) {
 	}
 	secure_vt(&vt);
 
-	while (unauth) {
+	while (unauth || unauth == 1000) {
 		flush_vt(&vt);
 		prompt(vt.ios, "%s's password: ", u->name);
 		unauth = authenticate(u, buf);
@@ -183,6 +183,10 @@ int main(int argc, char **argv) {
 				u = u == &root ? &user : &root;
 				try = 0;
 			}
+			fprintf(vt.ios, "\nAuthentication failed\n\n");
+			syslog(LOG_WARNING, "Authentication failure");
+			sleep(AUTH_FAIL_TIMEOUT);
+		} else if(unauth == 1000) {
 			fprintf(vt.ios, "\nAuthentication failed\n\n");
 			syslog(LOG_WARNING, "Authentication failure");
 			sleep(AUTH_FAIL_TIMEOUT);

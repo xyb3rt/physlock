@@ -97,7 +97,7 @@ int authenticate(const userinfo_t *uinfo, const char *pw) {
 
 	cryptpw = crypt(pw, uinfo->pwhash);
 	if (cryptpw == NULL)
-		return -1;
+		return 1000;
 
 	return strcmp(cryptpw, uinfo->pwhash) != 0;
 }
