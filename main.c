@@ -173,7 +173,7 @@ int main(int argc, char **argv) {
 	}
 	secure_vt(&vt);
 
-	while (unauth || unauth == 1000) {
+	while (unauth) {
 		flush_vt(&vt);
 		prompt(vt.ios, "%s's password: ", u->name);
 		unauth = authenticate(u, buf);
