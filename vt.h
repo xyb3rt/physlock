@@ -35,15 +35,15 @@ typedef struct vt_s {
 void vt_init();
 CLEANUP void vt_destroy();
 
-void get_current_vt(int*);
-CLEANUP int lock_vt_switch(int);
+void vt_get_current(int*);
+CLEANUP int vt_lock_switch(int);
 
-void acquire_new_vt(vt_t*);
-void reopen_vt(vt_t*);
-CLEANUP int release_vt(vt_t*, int);
+void vt_acquire(vt_t*);
+void vt_reopen(vt_t*);
+CLEANUP int vt_release(vt_t*, int);
 
-void secure_vt(vt_t*);
-void flush_vt(vt_t*);
-CLEANUP void reset_vt(vt_t*);
+void vt_secure(vt_t*);
+void vt_flush(vt_t*);
+CLEANUP void vt_reset(vt_t*);
 
 #endif /* VT_H */

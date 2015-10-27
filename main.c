@@ -43,9 +43,9 @@ void cleanup() {
 	if (oldprintk > 1)
 		write_int_to_file(PRINTK_PATH, oldprintk);
 	if (vt.fd >= 0)
-		reset_vt(&vt);
-	lock_vt_switch(0);
-	release_vt(&vt, oldvt);
+		vt_reset(&vt);
+	vt_lock_switch(0);
+	vt_release(&vt, oldvt);
 	vt_destroy();
 	closelog();
 	memset(buf, 0, sizeof(buf));
@@ -108,10 +108,10 @@ int main(int argc, char **argv) {
 	openlog(progname, LOG_PID, LOG_AUTH);
 
 	vt_init();
-	get_current_vt(&oldvt);
+	vt_get_current(&oldvt);
 
 	if (options->lock_switch != -1) {
-		if (lock_vt_switch(options->lock_switch) == -1)
+		if (vt_lock_switch(options->lock_switch) == -1)
 			exit(EXIT_FAILURE);
 		vt_destroy();
 		return 0;
@@ -138,8 +138,8 @@ int main(int argc, char **argv) {
 				exit(EXIT_FAILURE);
 	}
 
-	acquire_new_vt(&vt);
-	lock_vt_switch(1);
+	vt_acquire(&vt);
+	vt_lock_switch(1);
 
 	atexit(cleanup);
 
@@ -152,13 +152,13 @@ int main(int argc, char **argv) {
 		} else {
 			setsid();
 			sleep(1); /* w/o this, accessing the vt might fail */
-			reopen_vt(&vt);
+			vt_reopen(&vt);
 		}
 	}
-	secure_vt(&vt);
+	vt_secure(&vt);
 
 	while (unauth) {
-		flush_vt(&vt);
+		vt_flush(&vt);
 		prompt(vt.ios, "%s's password: ", u->name);
 		unauth = authenticate(u, buf);
 		memset(buf, 0, sizeof(buf));

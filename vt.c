@@ -47,7 +47,7 @@ CLEANUP void vt_destroy() {
 	}
 }
 
-void get_current_vt(int *nr) {
+void vt_get_current(int *nr) {
 	struct vt_stat vtstat;
 
 	if (ioctl(fd, VT_GETSTATE, &vtstat) == -1)
@@ -55,7 +55,7 @@ void get_current_vt(int *nr) {
 	*nr = vtstat.v_active;
 }
 
-CLEANUP int lock_vt_switch(int set) {
+CLEANUP int vt_lock_switch(int set) {
 	int ret;
 	
 	if (set) {
@@ -68,7 +68,7 @@ CLEANUP int lock_vt_switch(int set) {
 	return ret;
 }
 
-void acquire_new_vt(vt_t *vt) {
+void vt_acquire(vt_t *vt) {
 	int ret;
 
 	vt->nr = -1;
@@ -94,7 +94,7 @@ void acquire_new_vt(vt_t *vt) {
 	vt->rlflag = vt->term.c_lflag;
 }
 
-void reopen_vt(vt_t *vt) {
+void vt_reopen(vt_t *vt) {
 	vt->fd = -1;
 	vt->ios = freopen(filename, "r+", vt->ios);
 	if (vt->ios == NULL)
@@ -102,7 +102,7 @@ void reopen_vt(vt_t *vt) {
 	vt->fd = fileno(vt->ios);
 }
 
-CLEANUP int release_vt(vt_t *vt, int nr) {
+CLEANUP int vt_release(vt_t *vt, int nr) {
 	int ret;
 
 	if (ioctl(fd, VT_ACTIVATE, nr) == -1) {
@@ -131,16 +131,16 @@ CLEANUP int release_vt(vt_t *vt, int nr) {
 	return 0;
 }
 
-void secure_vt(vt_t *vt) {
+void vt_secure(vt_t *vt) {
 	vt->term.c_lflag &= ~(ECHO | ISIG);
 	tcsetattr(vt->fd, TCSANOW, &vt->term);
 }
 
-void flush_vt(vt_t *vt) {
+void vt_flush(vt_t *vt) {
 	tcflush(vt->fd, TCIFLUSH);
 }
 
-CLEANUP void reset_vt(vt_t *vt) {
+CLEANUP void vt_reset(vt_t *vt) {
 	fprintf(vt->ios, "\033[H\033[J"); /* clear the screen */
 	vt->term.c_lflag = vt->rlflag;
 	tcsetattr(vt->fd, TCSANOW, &vt->term);
