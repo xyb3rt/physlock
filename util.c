@@ -23,41 +23,24 @@
 
 #include "util.h"
 
-extern const char *progname;
+const char *progname;
 
-void cleanup();
+void error(int eval, int err, const char* fmt, ...)
+{
+	va_list ap;
 
-void warn(const char *fmt, ...) {
-	va_list args;
+	fflush(stdout);
+	fprintf(stderr, "%s: ", progname);
+	va_start(ap, fmt);
+	if (fmt != NULL)
+		vfprintf(stderr, fmt, ap);
+	va_end(ap);
+	if (err != 0)
+		fprintf(stderr, "%s%s", fmt != NULL ? ": " : "", strerror(err));
+	fputc('\n', stderr);
 
-	if (!fmt)
-		return;
-
-	va_start(args, fmt);
-	fprintf(stderr, "%s: warning: ", progname);
-	vfprintf(stderr, fmt, args);
-	fprintf(stderr, "\n");
-	va_end(args);
-}
-
-void die(const char *fmt, ...) {
-	va_list args;
-
-	if (fmt) {
-		va_start(args, fmt);
-		fprintf(stderr, "%s: error: ", progname);
-		vfprintf(stderr, fmt, args);
-		fprintf(stderr, "\n");
-		va_end(args);
-	}
-	cleanup();
-	exit(1);
-}
-
-char* s_basename(char *path) {
-	char *b = strrchr(path, '/');
-
-	return b != NULL && *++b != '\0' ? b : path;
+	if (eval != 0)
+		exit(eval);
 }
 
 char* s_strdup(const char *s) {
@@ -66,7 +49,7 @@ char* s_strdup(const char *s) {
 	if (s != NULL) {
 		d = malloc(strlen(s) + 1);
 		if (d == NULL)
-			die("could not allocate memory");
+			error(EXIT_FAILURE, errno, NULL);
 		strcpy(d, s);
 	}
 	return d;
@@ -84,11 +67,11 @@ size_t read_file(const char *path, char *buf, size_t len) {
 
 	ctl_file = fopen(path, "r");
 	if (ctl_file == NULL)
-		die("could not open file: %s: %s", path, strerror(errno));
+		error(EXIT_FAILURE, errno, "%s", path);
 
 	nread = fread(buf, 1, len - 1, ctl_file);
 	if (ferror(ctl_file))
-		die("could not read file: %s: %s", path, strerror(errno));
+		error(EXIT_FAILURE, 0, "%s: Error reading file", path);
 
 	fclose(ctl_file);
 	buf[nread] = '\0';
@@ -98,21 +81,23 @@ size_t read_file(const char *path, char *buf, size_t len) {
 
 /*
  * Write a buffer into a file.
- * The call always succeeds (it dies() on failure).
- * Returns the number of characters written.
+ * Returns the number of characters written or -1 on failure.
  */
-size_t write_file(const char *path, char *buf, size_t len) {
+CLEANUP ssize_t write_file(const char *path, char *buf, size_t len) {
 	FILE *ctl_file;
 	size_t nwritten;
 
 	ctl_file = fopen(path, "w+");
-	if (ctl_file == NULL)
-		die("could not open file: %s: %s", path, strerror(errno));
+	if (ctl_file == NULL) {
+		error(0, errno, "%s", path);
+		return -1;
+	}
 
 	nwritten = fwrite(buf, 1, len, ctl_file);
-	if (ferror(ctl_file))
-		die("could not write file: %s: %s", path, strerror(errno));
-
+	if (ferror(ctl_file)) {
+		error(0, 0, "%s: Error writing file", path);
+		return -1;
+	}
 	fclose(ctl_file);
 
 	return nwritten;
@@ -130,19 +115,19 @@ int read_int_from_file(const char *path, char ending_char) {
 
 	value = strtol(buf, &end, 0);
 	if (*end && *end != ending_char)
-		die("invalid file content: %s: %s", path, buf);
+		error(EXIT_FAILURE, 0, "%s: Invalid file content", path);
 
 	return value;
 }
 
 /*
  * Write integer to file.
- * The call always succeeds (it dies() on failure).
+ * Returns the number of characters written or -1 on failure.
  */
-void write_int_to_file(const char *path, int value) {
+CLEANUP ssize_t write_int_to_file(const char *path, int value) {
 	char buf[32];
 
 	snprintf(buf, sizeof(buf), "%d\n", value);
-	write_file(path, buf, strlen(buf));
+	return write_file(path, buf, strlen(buf));
 }
 

@@ -22,9 +22,8 @@
 typedef struct options_s {
 	int detach;
 	int disable_sysrq;
+	int lock_switch;
 	int mute_kernel_messages;
-	int only_lock;
-	int only_unlock;
 } options_t;
 
 extern const options_t *options;

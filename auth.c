@@ -18,6 +18,7 @@
 
 #include <paths.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <shadow.h>
 #include <pwd.h>
@@ -35,7 +36,7 @@ static void get_pw(userinfo_t *uinfo) {
 
 	spw = getspnam(uinfo->name);
 	if (spw == NULL)
-		die("could not get password hash of user %s", uinfo->name);
+		error(EXIT_FAILURE, 0, "No password hash for user %s found", uinfo->name);
 
 	uinfo->pwhash = s_strdup(spw->sp_pwdp);
 
@@ -49,7 +50,7 @@ void get_user(userinfo_t *uinfo, int vt) {
 
 	uf = fopen(_PATH_UTMP, "r");
 	if (uf == NULL)
-		die("could not open: %s: %s", _PATH_UTMP, strerror(errno));
+		error(EXIT_FAILURE, errno, "%s", _PATH_UTMP);
 
 	uinfo->name = NULL;
 	snprintf(tty, sizeof(tty), "tty%d", vt);
@@ -67,7 +68,7 @@ void get_user(userinfo_t *uinfo, int vt) {
 	fclose(uf);
 
 	if (uinfo->name == NULL)
-		die("could not identify active user");
+		error(EXIT_FAILURE, 0, "%s: No entry for %s found", _PATH_UTMP, tty);
 
 	get_pw(uinfo);
 }
@@ -77,7 +78,7 @@ void get_root(userinfo_t *uinfo) {
 
 	pw = getpwuid(0);
 	if (pw == NULL)
-		die("could not get user info for uid 0");
+		error(EXIT_FAILURE, 0, "No password file entry for uid 0 found");
 
 	uinfo->name = s_strdup(pw->pw_name);
 

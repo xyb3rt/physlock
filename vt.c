@@ -18,6 +18,7 @@
 
 #include <fcntl.h>
 #include <pwd.h>
+#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <linux/vt.h>
@@ -36,11 +37,10 @@ static char filename[1024];
 void vt_init() {
 	fd = open(CONSOLE_DEVICE, O_RDWR);
 	if (fd < 0)
-		die("could not open console device %s: %s", CONSOLE_DEVICE,
-		    strerror(errno));
+		error(EXIT_FAILURE, errno, "%s", CONSOLE_DEVICE);
 }
 
-void vt_destroy() {
+CLEANUP void vt_destroy() {
 	if (fd >= 0) {
 		close(fd);
 		fd = -1;
@@ -51,8 +51,21 @@ void get_current_vt(int *nr) {
 	struct vt_stat vtstat;
 
 	if (ioctl(fd, VT_GETSTATE, &vtstat) == -1)
-		die("could not get state of active console: %s", strerror(errno));
+		error(EXIT_FAILURE, errno, "%s: VT_GETSTATE", CONSOLE_DEVICE);
 	*nr = vtstat.v_active;
+}
+
+CLEANUP int lock_vt_switch(int set) {
+	int ret;
+	
+	if (set) {
+		if ((ret = ioctl(fd, VT_LOCKSWITCH, 1)) == -1)
+			error(0, errno, "%s: VT_LOCKSWITCH", CONSOLE_DEVICE);
+	} else {
+		if ((ret = ioctl(fd, VT_UNLOCKSWITCH, 1)) == -1)
+			error(0, errno, "%s: VT_UNLOCKSWITCH", CONSOLE_DEVICE);
+	}
+	return ret;
 }
 
 void acquire_new_vt(vt_t *vt) {
@@ -63,19 +76,19 @@ void acquire_new_vt(vt_t *vt) {
 	vt->fd = -1;
 
 	if (ioctl(fd, VT_OPENQRY, &vt->nr) == -1)
-		die("could not open new console: %s", strerror(errno));
+		error(EXIT_FAILURE, errno, "%s: VT_OPENQRY", CONSOLE_DEVICE);
 
 	snprintf(filename, sizeof(filename), "%s%d", TTY_DEVICE_BASE, vt->nr);
 	vt->ios = fopen(filename, "r+");
 	if (vt->ios == NULL)
-		die("could not open %s: %s", filename, strerror(errno));
+		error(EXIT_FAILURE, errno, "%s", filename);
 	vt->fd = fileno(vt->ios);
 
 	if (ioctl(fd, VT_ACTIVATE, vt->nr) == -1)
-		die("could not activate console # %d: %s", vt->nr, strerror(errno));
+		error(EXIT_FAILURE, errno, "%s: VT_ACTIVATE", CONSOLE_DEVICE);
 	while ((ret = ioctl(fd, VT_WAITACTIVE, vt->nr)) == -1 && errno == EINTR);
 	if (ret == -1)
-		die("could not wait for console # %d: %s", vt->nr, strerror(errno));
+		error(EXIT_FAILURE, errno, "%s: VT_WAITACTIVE", CONSOLE_DEVICE);
 
 	tcgetattr(vt->fd, &vt->term);
 	vt->rlflag = vt->term.c_lflag;
@@ -85,18 +98,22 @@ void reopen_vt(vt_t *vt) {
 	vt->fd = -1;
 	vt->ios = freopen(filename, "r+", vt->ios);
 	if (vt->ios == NULL)
-		die("could not open %s: %s", filename, strerror(errno));
+		error(EXIT_FAILURE, errno, "%s", filename);
 	vt->fd = fileno(vt->ios);
 }
 
-void release_vt(vt_t *vt, int nr) {
+CLEANUP int release_vt(vt_t *vt, int nr) {
 	int ret;
 
-	if (ioctl(fd, VT_ACTIVATE, nr) == -1)
-		die("could not activate console # %d: %s", nr, strerror(errno));
+	if (ioctl(fd, VT_ACTIVATE, nr) == -1) {
+		error(0, errno, "%s: VT_ACTIVATE", CONSOLE_DEVICE);
+		return -1;
+	}
 	while ((ret = ioctl(fd, VT_WAITACTIVE, nr)) == -1 && errno == EINTR);
-	if (ret == -1)
-		die("could not wait for console # %d: %s", nr, strerror(errno));
+	if (ret == -1) {
+		error(0, errno, "%s: VT_WAITACTIVE", CONSOLE_DEVICE);
+		return -1;
+	}
 
 	if (vt->ios != NULL) {
 		fclose(vt->ios);
@@ -105,20 +122,13 @@ void release_vt(vt_t *vt, int nr) {
 	}
 
 	if (vt->nr > 0) {
-		if (ioctl(fd, VT_DISALLOCATE, vt->nr) == -1)
-			die("could not deallocate console # %d: %s", vt->nr, strerror(errno));
+		if (ioctl(fd, VT_DISALLOCATE, vt->nr) == -1) {
+			error(0, errno, "%s: VT_DISALLOCATE", CONSOLE_DEVICE);
+			return -1;
+		}
 		vt->nr = -1;
 	}
-}
-
-void lock_vt_switch() {
-	if (ioctl(fd, VT_LOCKSWITCH, 1) == -1)
-		die("could not lock console switching: %s", strerror(errno));
-}
-
-void unlock_vt_switch() {
-	if (ioctl(fd, VT_UNLOCKSWITCH, 1) == -1)
-		die("could not enable console switching: %s", strerror(errno));
+	return 0;
 }
 
 void secure_vt(vt_t *vt) {
@@ -130,7 +140,7 @@ void flush_vt(vt_t *vt) {
 	tcflush(vt->fd, TCIFLUSH);
 }
 
-void reset_vt(vt_t *vt) {
+CLEANUP void reset_vt(vt_t *vt) {
 	fprintf(vt->ios, "\033[H\033[J"); /* clear the screen */
 	vt->term.c_lflag = vt->rlflag;
 	tcsetattr(vt->fd, TCSANOW, &vt->term);

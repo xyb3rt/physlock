@@ -31,7 +31,6 @@
 #include "util.h"
 #include "vt.h"
 
-const char *progname;
 static char buf[1024];
 static int oldvt;
 static vt_t vt;
@@ -39,41 +38,32 @@ static int oldsysrq;
 static int oldprintk;
 
 void cleanup() {
-	static int in = 0;
-
-	if (!in++) {
-		if (oldsysrq > 0)
-			write_int_to_file(SYSRQ_PATH, oldsysrq);
-		if (oldprintk > 1)
-			write_int_to_file(PRINTK_PATH, oldprintk);
-		if (vt.fd >= 0)
-			reset_vt(&vt);
-		unlock_vt_switch();
-		release_vt(&vt, oldvt);
-		vt_destroy();
-		closelog();
-		memset(buf, 0, sizeof(buf));
-	}
+	if (oldsysrq > 0)
+		write_int_to_file(SYSRQ_PATH, oldsysrq);
+	if (oldprintk > 1)
+		write_int_to_file(PRINTK_PATH, oldprintk);
+	if (vt.fd >= 0)
+		reset_vt(&vt);
+	lock_vt_switch(0);
+	release_vt(&vt, oldvt);
+	vt_destroy();
+	closelog();
+	memset(buf, 0, sizeof(buf));
 }
 
 void sa_handler_exit(int signum) {
-	cleanup();
 	exit(0);
 }
 
-int setup_signal(int signum, void (*handler)(int)) {
+void setup_signal(int signum, void (*handler)(int)) {
 	struct sigaction sigact;
 
 	sigact.sa_flags = 0;
 	sigact.sa_handler = handler;
 	sigemptyset(&sigact.sa_mask);
 	
-	if (sigaction(signum, &sigact, NULL) < 0) {
-		warn("could not set handler for signal %d: %s", signum, strerror(errno));
-		return -1;
-	} else {
-		return 0;
-	}
+	if (sigaction(signum, &sigact, NULL) < 0)
+		error(0, errno, "signal %d", signum);
 }
 
 void prompt(FILE *stream, const char *fmt, ...) {
@@ -89,7 +79,7 @@ void prompt(FILE *stream, const char *fmt, ...) {
 			buf[i++] = (char) c;
 	}
 	if (ferror(stream))
-		die("could not read from console: %s", strerror(errno));
+		error(EXIT_FAILURE, 0, "Error reading from console");
 	buf[i] = '\0';
 }
 
@@ -97,16 +87,13 @@ int main(int argc, char **argv) {
 	int try = 0, unauth = 1, user_only = 1;
 	userinfo_t root, user, *u = &user;
 
-	progname = s_basename(argv[0]);
 	oldvt = oldsysrq = oldprintk = vt.nr = vt.fd = -1;
 	vt.ios = NULL;
 
 	parse_options(argc, argv);
 
-	if (geteuid() != 0) {
-		fprintf(stderr, "%s: must be root!\n", progname);
-		return 1;
-	}
+	if (geteuid() != 0)
+		error(EXIT_FAILURE, 0, "Must be root!");
 
 	setup_signal(SIGTERM, sa_handler_exit);
 	setup_signal(SIGQUIT, sa_handler_exit);
@@ -123,19 +110,16 @@ int main(int argc, char **argv) {
 	vt_init();
 	get_current_vt(&oldvt);
 
-	if (options->only_lock) {
-		lock_vt_switch();
-		vt_destroy();
-		return 0;
-	} else if (options->only_unlock) {
-		unlock_vt_switch();
+	if (options->lock_switch != -1) {
+		if (lock_vt_switch(options->lock_switch) == -1)
+			exit(EXIT_FAILURE);
 		vt_destroy();
 		return 0;
 	}
 
 	get_user(&user, oldvt);
 	if (authenticate(&user, "") == -1)
-		die("could not hash password for user %s", user.name);
+		error(EXIT_FAILURE, 0, "Error hashing password for user %s", user.name);
 	get_root(&root);
 	if (strcmp(user.name, root.name) != 0 && authenticate(&root, "") != -1)
 		user_only = 0;
@@ -143,22 +127,26 @@ int main(int argc, char **argv) {
 	if (options->disable_sysrq) {
 		oldsysrq = read_int_from_file(SYSRQ_PATH, '\n');
 		if (oldsysrq > 0)
-			write_int_to_file(SYSRQ_PATH, 0);
+			if (write_int_to_file(SYSRQ_PATH, 0) == -1)
+				exit(EXIT_FAILURE);
 	}
 
 	if (options->mute_kernel_messages) {
 		oldprintk = read_int_from_file(PRINTK_PATH, '\t');
 		if (oldprintk > 1)
-			write_int_to_file(PRINTK_PATH, 1);
+			if (write_int_to_file(PRINTK_PATH, 1) == -1)
+				exit(EXIT_FAILURE);
 	}
 
 	acquire_new_vt(&vt);
-	lock_vt_switch();
+	lock_vt_switch(1);
+
+	atexit(cleanup);
 
 	if (options->detach) {
 		int chpid = fork();
 		if (chpid < 0) {
-			die("could not spawn background process: %s", strerror(errno));
+			error(EXIT_FAILURE, errno, "fork");
 		} else if (chpid > 0) {
 			return 0;
 		} else {
@@ -184,7 +172,6 @@ int main(int argc, char **argv) {
 			sleep(AUTH_FAIL_TIMEOUT);
 		}
 	}
-	cleanup();
 
 	return 0;
 }
