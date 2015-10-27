@@ -38,7 +38,7 @@ static void get_pw(userinfo_t *uinfo) {
 	if (spw == NULL)
 		error(EXIT_FAILURE, 0, "No password hash for user %s found", uinfo->name);
 
-	uinfo->pwhash = s_strdup(spw->sp_pwdp);
+	uinfo->pwhash = estrdup(spw->sp_pwdp);
 
 	endspent();
 }
@@ -61,7 +61,7 @@ void get_user(userinfo_t *uinfo, int vt) {
 		if (r.ut_type != USER_PROCESS || r.ut_user[0] == '\0')
 			continue;
 		if (strcmp(r.ut_line, tty) == 0) {
-			uinfo->name = s_strdup(r.ut_user);
+			uinfo->name = estrdup(r.ut_user);
 			break;
 		}
 	}
@@ -80,7 +80,7 @@ void get_root(userinfo_t *uinfo) {
 	if (pw == NULL)
 		error(EXIT_FAILURE, 0, "No password file entry for uid 0 found");
 
-	uinfo->name = s_strdup(pw->pw_name);
+	uinfo->name = estrdup(pw->pw_name);
 
 	get_pw(uinfo);
 }

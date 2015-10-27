@@ -28,7 +28,7 @@ extern const char *progname;
 
 void error(int, int, const char*, ...);
 
-char* s_strdup(const char*);
+char* estrdup(const char*);
 
 int read_int_from_file(const char*, char);
 CLEANUP ssize_t write_int_to_file(const char*, int);

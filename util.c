@@ -43,15 +43,14 @@ void error(int eval, int err, const char* fmt, ...)
 		exit(eval);
 }
 
-char* s_strdup(const char *s) {
-	char *d = NULL;
+char* estrdup(const char *s) {
+	char *d;
+	size_t n = strlen(s) + 1;
 
-	if (s != NULL) {
-		d = malloc(strlen(s) + 1);
-		if (d == NULL)
-			error(EXIT_FAILURE, errno, NULL);
-		strcpy(d, s);
-	}
+	d = malloc(n);
+	if (d == NULL)
+		error(EXIT_FAILURE, errno, NULL);
+	memcpy(d, s, n);
 	return d;
 }
 
