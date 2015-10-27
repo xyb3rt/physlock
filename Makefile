@@ -1,9 +1,9 @@
-VERSION  := git-20150909
+VERSION  := git-20151027
 
 CC       ?= gcc
 PREFIX   := /usr/local
 CFLAGS   += -Wall -pedantic
-CPPFLAGS += -DVERSION=\"$(VERSION)\"
+CPPFLAGS += -DVERSION=\"$(VERSION)\" -D_XOPEN_SOURCE=500
 LDFLAGS  +=
 LIBS     := -lcrypt
 

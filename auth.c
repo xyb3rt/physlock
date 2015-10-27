@@ -16,9 +16,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#define _POSIX_C_SOURCE 200112L
-#define _XOPEN_SOURCE   500 /* for crypt() */
-
 #include <paths.h>
 #include <stdio.h>
 #include <string.h>
