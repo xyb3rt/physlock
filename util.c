@@ -23,8 +23,6 @@
 
 #include "util.h"
 
-enum { BUFLEN = 32 };
-
 extern const char *progname;
 
 void cleanup();
@@ -125,10 +123,10 @@ size_t write_file(const char *path, char *buf, size_t len) {
  * The call always succeeds (it dies() on failure).
  */
 int read_int_from_file(const char *path, char ending_char) {
-	char buf[BUFLEN], *end;
+	char buf[32], *end;
 	int value;
 
-	read_file(path, buf, BUFLEN);
+	read_file(path, buf, sizeof(buf));
 
 	value = strtol(buf, &end, 0);
 	if (*end && *end != ending_char)
@@ -142,9 +140,9 @@ int read_int_from_file(const char *path, char ending_char) {
  * The call always succeeds (it dies() on failure).
  */
 void write_int_to_file(const char *path, int value) {
-	char buf[BUFLEN];
+	char buf[32];
 
-	snprintf(buf, BUFLEN, "%d\n", value);
+	snprintf(buf, sizeof(buf), "%d\n", value);
 	write_file(path, buf, strlen(buf));
 }
 

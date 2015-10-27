@@ -31,10 +31,8 @@
 #include "util.h"
 #include "vt.h"
 
-enum { BUFLEN = 1024 };
-
 const char *progname;
-static char buf[BUFLEN];
+static char buf[1024];
 static int oldvt;
 static vt_t vt;
 static int oldsysrq;
@@ -87,7 +85,7 @@ void prompt(FILE *stream, const char *fmt, ...) {
 	va_end(args);
 
 	while ((c = fgetc(stream)) != EOF && c != '\n') {
-		if (c != '\0' && i + 1 < BUFLEN)
+		if (c != '\0' && i + 1 < sizeof(buf))
 			buf[i++] = (char) c;
 	}
 	if (ferror(stream))

@@ -30,10 +30,8 @@
 #include "util.h"
 #include "vt.h"
 
-enum { FNAME_LEN = 1024 };
-
 static int fd = -1;
-static char filename[FNAME_LEN];
+static char filename[1024];
 
 void vt_init() {
 	fd = open(CONSOLE_DEVICE, O_RDWR);
@@ -67,7 +65,7 @@ void acquire_new_vt(vt_t *vt) {
 	if (ioctl(fd, VT_OPENQRY, &vt->nr) == -1)
 		die("could not open new console: %s", strerror(errno));
 
-	snprintf(filename, FNAME_LEN, "%s%d", TTY_DEVICE_BASE, vt->nr);
+	snprintf(filename, sizeof(filename), "%s%d", TTY_DEVICE_BASE, vt->nr);
 	vt->ios = fopen(filename, "r+");
 	if (vt->ios == NULL)
 		die("could not open %s: %s", filename, strerror(errno));
