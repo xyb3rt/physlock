@@ -48,7 +48,7 @@ void get_user(userinfo_t *uinfo, int vt) {
 	struct utmp r;
 	char tty[16], name[UT_NAMESIZE+1];
 
-	uf = fopen(_PATH_UTMP, "r");
+	while ((uf = fopen(_PATH_UTMP, "r")) == NULL && errno == EINTR);
 	if (uf == NULL)
 		error(EXIT_FAILURE, errno, "%s", _PATH_UTMP);
 
@@ -78,7 +78,7 @@ void get_user(userinfo_t *uinfo, int vt) {
 void get_root(userinfo_t *uinfo) {
 	struct passwd *pw;
 
-	pw = getpwuid(0);
+	while (errno = 0, (pw = getpwuid(0)) == NULL && errno == EINTR);
 	if (pw == NULL)
 		error(EXIT_FAILURE, 0, "No password file entry for uid 0 found");
 

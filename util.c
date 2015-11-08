@@ -64,7 +64,7 @@ size_t read_file(const char *path, char *buf, size_t len) {
 	FILE *ctl_file;
 	size_t nread;
 
-	ctl_file = fopen(path, "r");
+	while ((ctl_file = fopen(path, "r")) == NULL && errno == EINTR);
 	if (ctl_file == NULL)
 		error(EXIT_FAILURE, errno, "%s", path);
 
@@ -86,7 +86,7 @@ CLEANUP ssize_t write_file(const char *path, char *buf, size_t len) {
 	FILE *ctl_file;
 	size_t nwritten;
 
-	ctl_file = fopen(path, "w+");
+	while ((ctl_file = fopen(path, "w+")) == NULL && errno == EINTR);
 	if (ctl_file == NULL) {
 		error(0, errno, "%s", path);
 		return -1;

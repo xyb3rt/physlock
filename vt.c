@@ -35,7 +35,7 @@ static int fd = -1;
 static char filename[1024];
 
 void vt_init() {
-	fd = open(CONSOLE_DEVICE, O_RDWR);
+	while ((fd = open(CONSOLE_DEVICE, O_RDWR)) == -1 && errno == EINTR);
 	if (fd < 0)
 		error(EXIT_FAILURE, errno, "%s", CONSOLE_DEVICE);
 }
@@ -48,9 +48,11 @@ CLEANUP void vt_destroy() {
 }
 
 void vt_get_current(int *nr) {
+	int ret;
 	struct vt_stat vtstat;
 
-	if (ioctl(fd, VT_GETSTATE, &vtstat) == -1)
+	while ((ret = ioctl(fd, VT_GETSTATE, &vtstat)) == -1 && errno == EINTR);
+	if (ret == -1)
 		error(EXIT_FAILURE, errno, "%s: VT_GETSTATE", CONSOLE_DEVICE);
 	*nr = vtstat.v_active;
 }
@@ -59,10 +61,12 @@ CLEANUP int vt_lock_switch(int set) {
 	int ret;
 	
 	if (set) {
-		if ((ret = ioctl(fd, VT_LOCKSWITCH, 1)) == -1)
+		while ((ret = ioctl(fd, VT_LOCKSWITCH, 1)) == -1 && errno == EINTR);
+		if (ret == -1)
 			error(0, errno, "%s: VT_LOCKSWITCH", CONSOLE_DEVICE);
 	} else {
-		if ((ret = ioctl(fd, VT_UNLOCKSWITCH, 1)) == -1)
+		while ((ret = ioctl(fd, VT_UNLOCKSWITCH, 1)) == -1 && errno == EINTR);
+		if (ret == -1)
 			error(0, errno, "%s: VT_UNLOCKSWITCH", CONSOLE_DEVICE);
 	}
 	return ret;
@@ -75,16 +79,18 @@ void vt_acquire(vt_t *vt) {
 	vt->ios = NULL;
 	vt->fd = -1;
 
-	if (ioctl(fd, VT_OPENQRY, &vt->nr) == -1)
+	while ((ret = ioctl(fd, VT_OPENQRY, &vt->nr)) == -1 && errno == EINTR);
+	if (ret == -1)
 		error(EXIT_FAILURE, errno, "%s: VT_OPENQRY", CONSOLE_DEVICE);
 
 	snprintf(filename, sizeof(filename), "%s%d", TTY_DEVICE_BASE, vt->nr);
-	vt->ios = fopen(filename, "r+");
+	while ((vt->ios = fopen(filename, "r+")) == NULL && errno == EINTR);
 	if (vt->ios == NULL)
 		error(EXIT_FAILURE, errno, "%s", filename);
 	vt->fd = fileno(vt->ios);
 
-	if (ioctl(fd, VT_ACTIVATE, vt->nr) == -1)
+	while ((ret = ioctl(fd, VT_ACTIVATE, vt->nr)) == -1 && errno == EINTR);
+	if (ret == -1)
 		error(EXIT_FAILURE, errno, "%s: VT_ACTIVATE", CONSOLE_DEVICE);
 	while ((ret = ioctl(fd, VT_WAITACTIVE, vt->nr)) == -1 && errno == EINTR);
 	if (ret == -1)
@@ -95,8 +101,10 @@ void vt_acquire(vt_t *vt) {
 }
 
 void vt_reopen(vt_t *vt) {
+	FILE *ios = vt->ios;
+
 	vt->fd = -1;
-	vt->ios = freopen(filename, "r+", vt->ios);
+	while ((vt->ios = freopen(filename, "r+", ios)) == NULL && errno == EINTR);
 	if (vt->ios == NULL)
 		error(EXIT_FAILURE, errno, "%s", filename);
 	vt->fd = fileno(vt->ios);
@@ -105,7 +113,8 @@ void vt_reopen(vt_t *vt) {
 CLEANUP int vt_release(vt_t *vt, int nr) {
 	int ret;
 
-	if (ioctl(fd, VT_ACTIVATE, nr) == -1) {
+	while ((ret = ioctl(fd, VT_ACTIVATE, nr)) == -1 && errno == EINTR);
+	if (ret == -1) {
 		error(0, errno, "%s: VT_ACTIVATE", CONSOLE_DEVICE);
 		return -1;
 	}
@@ -122,7 +131,8 @@ CLEANUP int vt_release(vt_t *vt, int nr) {
 	}
 
 	if (vt->nr > 0) {
-		if (ioctl(fd, VT_DISALLOCATE, vt->nr) == -1) {
+		while ((ret = ioctl(fd, VT_DISALLOCATE, vt->nr)) == -1 && errno == EINTR);
+		if (ret == -1) {
 			error(0, errno, "%s: VT_DISALLOCATE", CONSOLE_DEVICE);
 			return -1;
 		}

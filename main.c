@@ -77,7 +77,10 @@ void prompt(FILE *stream, const char *fmt, ...) {
 	vfprintf(stream, fmt, args);
 	va_end(args);
 
-	while ((c = fgetc(stream)) != EOF && c != '\n') {
+	for (;;) {
+		while ((c = fgetc(stream)) == EOF && errno == EINTR);
+		if (c == EOF || c == '\n')
+			break;
 		if (c != '\0' && i + 1 < sizeof(buf))
 			buf[i++] = (char) c;
 	}
