@@ -36,8 +36,12 @@ static int oldvt;
 static vt_t vt;
 static int oldsysrq;
 static int oldprintk;
+static pid_t chpid;
 
 void cleanup() {
+	if (options->detach && chpid > 0)
+		/* No cleanup in parent after successful fork */
+		return;
 	if (oldsysrq > 0)
 		write_int_to_file(SYSRQ_PATH, oldsysrq);
 	if (oldprintk > 1)
@@ -47,7 +51,6 @@ void cleanup() {
 	vt_lock_switch(0);
 	vt_release(&vt, oldvt);
 	vt_destroy();
-	closelog();
 	memset(buf, 0, sizeof(buf));
 }
 
@@ -105,8 +108,6 @@ int main(int argc, char **argv) {
 	close(0);
 	close(1);
 
-	openlog(progname, LOG_PID, LOG_AUTH);
-
 	vt_init();
 	vt_get_current(&oldvt);
 
@@ -123,6 +124,8 @@ int main(int argc, char **argv) {
 	get_root(&root);
 	if (strcmp(user.name, root.name) != 0 && authenticate(&root, "") != -1)
 		user_only = 0;
+
+	atexit(cleanup);
 
 	if (options->disable_sysrq) {
 		oldsysrq = read_int_from_file(SYSRQ_PATH, '\n');
@@ -141,10 +144,8 @@ int main(int argc, char **argv) {
 	vt_acquire(&vt);
 	vt_lock_switch(1);
 
-	atexit(cleanup);
-
 	if (options->detach) {
-		int chpid = fork();
+		chpid = fork();
 		if (chpid < 0) {
 			error(EXIT_FAILURE, errno, "fork");
 		} else if (chpid > 0) {
@@ -156,6 +157,8 @@ int main(int argc, char **argv) {
 		}
 	}
 	vt_secure(&vt);
+
+	openlog(progname, LOG_PID, LOG_AUTH);
 
 	while (unauth) {
 		vt_flush(&vt);
