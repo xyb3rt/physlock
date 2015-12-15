@@ -46,7 +46,7 @@ static void get_pw(userinfo_t *uinfo) {
 void get_user(userinfo_t *uinfo, int vt) {
 	FILE *uf;
 	struct utmp r;
-	char tty[16];
+	char tty[16], name[UT_NAMESIZE+1];
 
 	uf = fopen(_PATH_UTMP, "r");
 	if (uf == NULL)
@@ -61,7 +61,9 @@ void get_user(userinfo_t *uinfo, int vt) {
 		if (r.ut_type != USER_PROCESS || r.ut_user[0] == '\0')
 			continue;
 		if (strcmp(r.ut_line, tty) == 0) {
-			uinfo->name = estrdup(r.ut_user);
+			strncpy(name, r.ut_user, UT_NAMESIZE);
+			name[UT_NAMESIZE] = '\0';
+			uinfo->name = estrdup(name);
 			break;
 		}
 	}
