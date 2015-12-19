@@ -1,4 +1,4 @@
-VERSION  := git-20151219
+VERSION  := 0.5
 
 CC       ?= gcc
 PREFIX   := /usr/local
