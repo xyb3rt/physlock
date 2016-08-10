@@ -11,6 +11,3 @@ static const char * const SYSRQ_PATH = "/proc/sys/kernel/sysrq";
 /* full path to kernel printk file:			*/
 static const char * const PRINTK_PATH = "/proc/sys/kernel/printk";
 
-/* timeout (seconds) after failed authentication try:  */
-enum { AUTH_FAIL_TIMEOUT = 2 };
-

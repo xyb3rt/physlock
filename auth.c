@@ -20,27 +20,23 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <shadow.h>
 #include <pwd.h>
 #include <unistd.h>
 #include <utmp.h>
 #include <errno.h>
+#include <security/pam_misc.h>
 
 #include "auth.h"
 #include "util.h"
 
-static void get_pw(userinfo_t *uinfo) {
-	struct spwd *spw;
+static struct pam_conv conv = {
+	misc_conv,
+	NULL
+};
 
-	setspent();
-
-	spw = getspnam(uinfo->name);
-	if (spw == NULL)
-		error(EXIT_FAILURE, 0, "No password hash for user %s found", uinfo->name);
-
-	uinfo->pwhash = estrdup(spw->sp_pwdp);
-
-	endspent();
+static void get_pam(userinfo_t *uinfo) {
+	if (pam_start("physlock", uinfo->name, &conv, &uinfo->pamh) != PAM_SUCCESS)
+		error(EXIT_FAILURE, 0, "no pam for user %s", uinfo->name);
 }
 
 void get_user(userinfo_t *uinfo, int vt) {
@@ -72,7 +68,7 @@ void get_user(userinfo_t *uinfo, int vt) {
 	if (uinfo->name == NULL)
 		error(EXIT_FAILURE, 0, "%s: No entry for %s found", _PATH_UTMP, tty);
 
-	get_pw(uinfo);
+	get_pam(uinfo);
 }
 
 void get_root(userinfo_t *uinfo) {
@@ -84,20 +80,19 @@ void get_root(userinfo_t *uinfo) {
 
 	uinfo->name = estrdup(pw->pw_name);
 
-	get_pw(uinfo);
+	get_pam(uinfo);
 }
 
-/* return value:
- *   0: authentication successful
- *   1: authentication failed
- *  -1: error
- */
-int authenticate(const userinfo_t *uinfo, const char *pw) {
-	char *cryptpw;
+CLEANUP void free_user(userinfo_t *uinfo) {
+	if (uinfo->pamh != NULL)
+		pam_end(uinfo->pamh, uinfo->pam_status);
+}
 
-	cryptpw = crypt(pw, uinfo->pwhash);
-	if (cryptpw == NULL)
-		return -1;
+int authenticate(userinfo_t *uinfo) {
+	uinfo->pam_status = pam_authenticate(uinfo->pamh, 0);
 
-	return strcmp(cryptpw, uinfo->pwhash) != 0;
+	if (uinfo->pam_status == PAM_SUCCESS)
+		uinfo->pam_status = pam_acct_mgmt(uinfo->pamh, 0);
+
+	return uinfo->pam_status == PAM_SUCCESS ? 0 : -1;
 }

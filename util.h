@@ -26,6 +26,7 @@
 
 extern const char *progname;
 
+void error_init(int);
 void error(int, int, const char*, ...);
 
 char* estrdup(const char*);

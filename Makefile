@@ -1,11 +1,11 @@
-VERSION  := 0.5
+VERSION  := git-20160810
 
 CC       ?= gcc
 PREFIX   := /usr/local
 CFLAGS   += -Wall -pedantic
 CPPFLAGS += -DVERSION=\"$(VERSION)\" -D_XOPEN_SOURCE=500
 LDFLAGS  +=
-LIBS     := -lcrypt
+LIBS     := -lpam -lpam_misc
 
 .PHONY: clean install uninstall
 

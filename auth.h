@@ -19,15 +19,19 @@
 #ifndef AUTH_H
 #define AUTH_H
 
-#include <sys/types.h>
+#include <security/pam_appl.h>
+
+#define CLEANUP
 
 typedef struct userinfo_s {
 	const char *name;
-	const char *pwhash;
+	int pam_status;
+	pam_handle_t *pamh;
 } userinfo_t;
 
 void get_user(userinfo_t*, int);
 void get_root(userinfo_t*);
-int authenticate(const userinfo_t*, const char*);
+CLEANUP void free_user(userinfo_t*);
+int authenticate(userinfo_t*);
 
 #endif /* AUTH_H */

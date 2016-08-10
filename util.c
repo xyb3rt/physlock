@@ -20,24 +20,33 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
+#include <unistd.h>
 
 #include "util.h"
 
 const char *progname;
+
+static FILE *Stderr;
+
+void error_init(int fd)
+{
+	if ((fd = dup(fd)) == -1 || (Stderr = fdopen(fd, "w")) == NULL)
+		Stderr = stderr;
+}
 
 void error(int eval, int err, const char* fmt, ...)
 {
 	va_list ap;
 
 	fflush(stdout);
-	fprintf(stderr, "%s: ", progname);
+	fprintf(Stderr, "%s: ", progname);
 	va_start(ap, fmt);
 	if (fmt != NULL)
-		vfprintf(stderr, fmt, ap);
+		vfprintf(Stderr, fmt, ap);
 	va_end(ap);
 	if (err != 0)
-		fprintf(stderr, "%s%s", fmt != NULL ? ": " : "", strerror(err));
-	fputc('\n', stderr);
+		fprintf(Stderr, "%s%s", fmt != NULL ? ": " : "", strerror(err));
+	fputc('\n', Stderr);
 
 	if (eval != 0)
 		exit(eval);

@@ -38,10 +38,14 @@ static int oldsysrq;
 static int oldprintk;
 static pid_t chpid;
 
+static userinfo_t root, user;
+
 void cleanup() {
 	if (options->detach && chpid > 0)
 		/* No cleanup in parent after successful fork */
 		return;
+	free_user(&user);
+	free_user(&root);
 	if (oldsysrq > 0)
 		write_int_to_file(SYSRQ_PATH, oldsysrq);
 	if (oldprintk > 1)
@@ -51,7 +55,6 @@ void cleanup() {
 	vt_lock_switch(0);
 	vt_release(&vt, oldvt);
 	vt_destroy();
-	memset(buf, 0, sizeof(buf));
 }
 
 void sa_handler_exit(int signum) {
@@ -91,11 +94,12 @@ void prompt(FILE *stream, const char *fmt, ...) {
 
 int main(int argc, char **argv) {
 	int try = 0, unauth = 1, user_only = 1;
-	userinfo_t root, user, *u = &user;
+	userinfo_t *u = &user;
 
 	oldvt = oldsysrq = oldprintk = vt.nr = vt.fd = -1;
 	vt.ios = NULL;
 
+	error_init(2);
 	parse_options(argc, argv);
 
 	if (geteuid() != 0)
@@ -108,9 +112,6 @@ int main(int argc, char **argv) {
 	setup_signal(SIGUSR1, SIG_IGN);
 	setup_signal(SIGUSR2, SIG_IGN);
 
-	close(0);
-	close(1);
-
 	vt_init();
 	vt_get_current(&oldvt);
 
@@ -122,10 +123,8 @@ int main(int argc, char **argv) {
 	}
 
 	get_user(&user, oldvt);
-	if (authenticate(&user, "") == -1)
-		error(EXIT_FAILURE, 0, "Error hashing password for user %s", user.name);
 	get_root(&root);
-	if (strcmp(user.name, root.name) != 0 && authenticate(&root, "") != -1)
+	if (strcmp(user.name, root.name) != 0)
 		user_only = 0;
 
 	atexit(cleanup);
@@ -161,21 +160,22 @@ int main(int argc, char **argv) {
 	}
 	vt_secure(&vt);
 
+	dup2(vt.fd, 0);
+	dup2(vt.fd, 1);
+	dup2(vt.fd, 2);
+
 	openlog(progname, LOG_PID, LOG_AUTH);
 
 	while (unauth) {
-		vt_flush(&vt);
-		prompt(vt.ios, "%s's password: ", u->name);
-		unauth = authenticate(u, buf);
-		memset(buf, 0, sizeof(buf));
+		fprintf(vt.ios, "User: %s\n", u->name);
+		unauth = authenticate(u);
 		if (unauth) {
 			if (!user_only && (u == &root || ++try == 3)) {
 				u = u == &root ? &user : &root;
 				try = 0;
 			}
-			fprintf(vt.ios, "\nAuthentication failed\n\n");
+			fprintf(vt.ios, "Authentication failed\n\n");
 			syslog(LOG_WARNING, "Authentication failure");
-			sleep(AUTH_FAIL_TIMEOUT);
 		}
 	}
 
