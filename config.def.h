@@ -10,3 +10,5 @@ static const char * const SYSRQ_PATH = "/proc/sys/kernel/sysrq";
 /* full path to kernel printk file:			*/
 static const char * const PRINTK_PATH = "/proc/sys/kernel/printk";
 
+/* full path to local issue file */
+static const char * const ISSUE_FILE_PATH = "/etc/issue";

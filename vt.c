@@ -60,7 +60,7 @@ void vt_get_current(int *nr, uid_t *owner) {
 
 CLEANUP int vt_lock_switch(int set) {
 	int ret;
-	
+
 	if (set) {
 		while ((ret = ioctl(fd, VT_LOCKSWITCH, 1)) == -1 && errno == EINTR);
 		if (ret == -1)

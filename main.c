@@ -98,7 +98,7 @@ void setup_signal(int signum, void (*handler)(int)) {
 	sigact.sa_flags = 0;
 	sigact.sa_handler = handler;
 	sigemptyset(&sigact.sa_mask);
-	
+
 	if (sigaction(signum, &sigact, NULL) < 0)
 		error(0, errno, "signal %d", signum);
 }
@@ -178,6 +178,16 @@ int main(int argc, char **argv) {
 	dup2(vt.fd, 0);
 	dup2(vt.fd, 1);
 	dup2(vt.fd, 2);
+
+    fprintf(vt.ios, "\nFoo!\n");
+
+    FILE *fp = fopen(ISSUE_FILE_PATH, "r");
+    char buffer[4096];
+    while (fgets(buffer, sizeof(buffer), fp) != 0) {
+        fputs(buffer, stdout);
+        fprintf(vt.ios, buffer);
+    }
+    fclose(fp);
 
 	if (options->prompt != NULL && options->prompt[0] != '\0') {
 		fprintf(vt.ios, "%s\n\n", options->prompt);
