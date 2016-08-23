@@ -3,7 +3,7 @@
 Basically, the same as PhysLock except it reads and shows the contents of whatever is in
 /etc/issue. Cool for awesome ANSI art lock screens. :)
 
-A sample has been provided (of Ryu from https://git.io/ryucolor).
+A sample has been provided of Ryu from https://git.io/ryucolor, but adjusted to fit 1080p screens better!
 
 ###Original README.md follows...
 
