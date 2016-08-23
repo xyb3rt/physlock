@@ -1,3 +1,12 @@
+# PhysLock but with /etc/issue display support.
+
+Basically, the same as PhysLock except it reads and shows the contents of whatever is in
+/etc/issue. Cool for awesome ANSI art lock screens. :)
+
+A sample has been provided (of Ryu from https://git.io/ryucolor).
+
+Original README.md follows...
+
 Control physical access to a linux computer by locking all of its virtual
 terminals.
 
