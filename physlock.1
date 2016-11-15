@@ -3,7 +3,7 @@
 physlock \- lock all consoles / virtual terminals
 .SH SYNOPSIS
 .B physlock
-.RB [ \-dhLlmsv ]
+.RB [ \-dhLlmsuv ]
 .SH DESCRIPTION
 physlock is an alternative to vlock, it is equivalent to `vlock \-an'. It is
 written because vlock blocks some linux kernel mechanisms like hibernate and
@@ -39,6 +39,9 @@ Mute kernel messages on console while physlock is running.
 .TP
 .B \-s
 Disable SysRq mechanism while physlock is running.
+.TP
+.B \-u
+Hide user's name when prompting for password to unlock
 .TP
 .B \-v
 Print version information to standard output and exit.

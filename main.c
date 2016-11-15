@@ -165,7 +165,10 @@ int main(int argc, char **argv) {
 
 	while (unauth) {
 		vt_flush(&vt);
-		prompt(vt.ios, "%s's password: ", u->name);
+		if (options->hide_username)
+			prompt(vt.ios, "password: ", u->name);
+		else
+			prompt(vt.ios, "%s's password: ", u->name);
 		unauth = authenticate(u, buf);
 		memset(buf, 0, sizeof(buf));
 		if (unauth) {
