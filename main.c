@@ -167,7 +167,10 @@ int main(int argc, char **argv) {
 	openlog(progname, LOG_PID, LOG_AUTH);
 
 	while (unauth) {
-		fprintf(vt.ios, "User: %s\n", u->name);
+		if (u == &root) {
+			fprintf(vt.ios, "%s's ", root.name);
+			fflush(vt.ios);
+		}
 		unauth = authenticate(u);
 		if (unauth) {
 			if (!user_only && (u == &root || ++try == 3)) {
