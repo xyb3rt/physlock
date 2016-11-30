@@ -43,7 +43,6 @@ void vt_reopen(vt_t*);
 CLEANUP int vt_release(vt_t*, int);
 
 void vt_secure(vt_t*);
-void vt_flush(vt_t*);
 CLEANUP void vt_reset(vt_t*);
 
 #endif /* VT_H */

@@ -146,10 +146,6 @@ void vt_secure(vt_t *vt) {
 	tcsetattr(vt->fd, TCSANOW, &vt->term);
 }
 
-void vt_flush(vt_t *vt) {
-	tcflush(vt->fd, TCIFLUSH);
-}
-
 CLEANUP void vt_reset(vt_t *vt) {
 	fprintf(vt->ios, "\033[H\033[J"); /* clear the screen */
 	vt->term.c_lflag = vt->rlflag;
