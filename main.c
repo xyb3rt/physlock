@@ -179,15 +179,9 @@ int main(int argc, char **argv) {
 	dup2(vt.fd, 1);
 	dup2(vt.fd, 2);
 
-    fprintf(vt.ios, "\nFoo!\n");
-
-    FILE *fp = fopen(ISSUE_FILE_PATH, "r");
-    char buffer[4096];
-    while (fgets(buffer, sizeof(buffer), fp) != 0) {
-        fputs(buffer, stdout);
-        fprintf(vt.ios, buffer);
+    if (!options->disable_issue) {
+        print_issue_file(vt, oldvt);
     }
-    fclose(fp);
 
 	if (options->prompt != NULL && options->prompt[0] != '\0') {
 		fprintf(vt.ios, "%s\n\n", options->prompt);

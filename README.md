@@ -1,11 +1,28 @@
-## PhysLock but with /etc/issue display support.
+Physlock extended to support displaying /etc/issue
+==================================================
 
-Basically, the same as PhysLock except it reads and shows the contents of whatever is in
-/etc/issue. Cool for awesome ANSI art lock screens. :)
+Basically, the same as Physlock except it reads and shows the contents of
+whatever is in `/etc/issue`. Cool for awesome ANSI art lock screens!
 
-A sample has been provided of Ryu from https://git.io/ryucolor, but adjusted to fit 1080p screens better!
+A sample has been provided of Ryu from https://git.io/ryucolor, but
+adjusted to fit 1080p screens better!
 
-###Original README.md follows...
+Additionally we are able to replace escape sequences, similarly to those
+support by `agetty(8)`, with:
+
+| Escape Sequence | Result |
+| --------------- | ------ |
+| `\m` | Print machine architecture (e.g. `x86_64`) |
+| `\n` | Print machine name |
+| `\r` | Print OS version |
+| `\s` | Print OS name |
+| `\v` | Print OS extra info |
+| `\d` or `\t` | Display date in ISO-8601 format or `HH:MM:SS` |
+| `\l` | Print tty number (e.g. "tty1", etc.) |
+| `\u` or `\U` | Print number of users logged in (including you) |
+
+About
+-----
 
 Control physical access to a linux computer by locking all of its virtual
 terminals.
@@ -70,3 +87,4 @@ The following command-line arguments are supported:
     -p MSG   Display MSG before the password prompt
     -s       disable sysrq key while physlock is running
     -v       print version information and exit
+    -z       disable printing the /etc/issue file

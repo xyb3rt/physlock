@@ -21,7 +21,7 @@ lib_elogind_1 = -lelogind
 ldlibs = $(LDLIBS) -lpam -lpam_misc \
   $(lib_systemd_$(HAVE_SYSTEMD)) $(lib_elogind_$(HAVE_ELOGIND))
 
-objs = main.o options.o session.o util.o vt.o
+objs = main.o options.o session.o util.o vt.o issue.o
 
 all: physlock
 
