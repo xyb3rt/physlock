@@ -3,7 +3,7 @@
 physlock \- lock all consoles / virtual terminals
 .SH SYNOPSIS
 .B physlock
-.RB [ \-dhLlmsv ]
+.RB [ \-dhLlmsvz ]
 .RB [ \-p
 .IR MSG ]
 .SH DESCRIPTION
@@ -49,6 +49,9 @@ Disable SysRq mechanism while physlock is running.
 .TP
 .B \-v
 Print version information to standard output and exit.
+.TP
+.B \-z
+Disables the parsing and printing of the /etc/issue file.
 .SH AUTHORS
 .TP
 Bert Muennich <ber.t at gmx.com>
