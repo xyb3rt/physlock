@@ -94,6 +94,7 @@ void prompt(FILE *stream, const char *fmt, ...) {
 
 int main(int argc, char **argv) {
 	int try = 0, user_only = 1;
+	uid_t owner;
 	userinfo_t *u = &user;
 
 	oldvt = oldsysrq = oldprintk = vt.nr = vt.fd = -1;
@@ -113,7 +114,7 @@ int main(int argc, char **argv) {
 	setup_signal(SIGUSR2, SIG_IGN);
 
 	vt_init();
-	vt_get_current(&oldvt);
+	vt_get_current(&oldvt, &owner);
 
 	if (options->lock_switch != -1) {
 		if (vt_lock_switch(options->lock_switch) == -1)
@@ -122,7 +123,7 @@ int main(int argc, char **argv) {
 		return 0;
 	}
 
-	get_user(&user, oldvt);
+	get_user(&user, oldvt, owner);
 	get_root(&root);
 	if (strcmp(user.name, root.name) != 0)
 		user_only = 0;

@@ -7,10 +7,13 @@ suspend and can therefore only be used with some limitations.
 physlock is designed to be more lightweight, it does not have a plugin
 interface and it is not started using a shell script wrapper.
 
-physlock relies on the utmp file to contain an entry for the active console
-whose `ut_line` field is set to its device name, i.e. "tty1". Some graphical
-login managers do not write such entries per default. You have to manually set
-up `sessreg(1)` in order to use physlock with such a login manager.
+physlock tries to detect the user logged in on the active console by first
+searching the utmp file for an entry whose `ut_line` field equals the device
+name of the active console, e.g. "tty1". If no such entry is found, then
+physlock falls back to the owner of the device file of the active console. Some
+graphical login managers do neither write an appropriate utmp entry nor set the
+owner of the device file. You have to manually set up `sessreg(1)` in order to
+use physlock with such a graphical login manager.
 
 Installation
 ------------

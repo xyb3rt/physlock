@@ -39,34 +39,36 @@ static void get_pam(userinfo_t *uinfo) {
 		error(EXIT_FAILURE, 0, "no pam for user %s", uinfo->name);
 }
 
-void get_user(userinfo_t *uinfo, int vt) {
+void get_user(userinfo_t *uinfo, int vt, uid_t owner) {
 	FILE *uf;
 	struct utmp r;
+	struct passwd *pw;
 	char tty[16], name[UT_NAMESIZE+1];
 
-	while ((uf = fopen(_PATH_UTMP, "r")) == NULL && errno == EINTR);
-	if (uf == NULL)
-		error(EXIT_FAILURE, errno, "%s", _PATH_UTMP);
-
 	uinfo->name = NULL;
-	snprintf(tty, sizeof(tty), "tty%d", vt);
+	while ((uf = fopen(_PATH_UTMP, "r")) == NULL && errno == EINTR);
 
-	while (!feof(uf) && !ferror(uf)) {
-		if (fread(&r, sizeof(r), 1, uf) != 1)
-			continue;
-		if (r.ut_type != USER_PROCESS || r.ut_user[0] == '\0')
-			continue;
-		if (strcmp(r.ut_line, tty) == 0) {
-			strncpy(name, r.ut_user, UT_NAMESIZE);
-			name[UT_NAMESIZE] = '\0';
-			uinfo->name = estrdup(name);
-			break;
+	if (uf != NULL) {
+		snprintf(tty, sizeof(tty), "tty%d", vt);
+		while (!feof(uf) && !ferror(uf)) {
+			if (fread(&r, sizeof(r), 1, uf) != 1)
+				continue;
+			if (r.ut_type != USER_PROCESS || r.ut_user[0] == '\0')
+				continue;
+			if (strcmp(r.ut_line, tty) == 0) {
+				strncpy(name, r.ut_user, UT_NAMESIZE);
+				name[UT_NAMESIZE] = '\0';
+				uinfo->name = estrdup(name);
+				break;
+			}
 		}
+		fclose(uf);
+	} else if (owner != (uid_t)-1 && (pw = getpwuid(owner)) != NULL) {
+		uinfo->name = estrdup(pw->pw_name);
 	}
-	fclose(uf);
 
 	if (uinfo->name == NULL)
-		error(EXIT_FAILURE, 0, "%s: No entry for %s found", _PATH_UTMP, tty);
+		error(EXIT_FAILURE, 0, "Unable to detect user of tty%d", vt);
 
 	get_pam(uinfo);
 }

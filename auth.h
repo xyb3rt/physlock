@@ -29,7 +29,7 @@ typedef struct userinfo_s {
 	pam_handle_t *pamh;
 } userinfo_t;
 
-void get_user(userinfo_t*, int);
+void get_user(userinfo_t*, int, uid_t);
 void get_root(userinfo_t*);
 CLEANUP void free_user(userinfo_t*);
 int authenticate(userinfo_t*);

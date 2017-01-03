@@ -35,7 +35,7 @@ typedef struct vt_s {
 void vt_init();
 CLEANUP void vt_destroy();
 
-void vt_get_current(int*);
+void vt_get_current(int*, uid_t*);
 CLEANUP int vt_lock_switch(int);
 
 void vt_acquire(vt_t*);
