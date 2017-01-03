@@ -93,7 +93,7 @@ void prompt(FILE *stream, const char *fmt, ...) {
 }
 
 int main(int argc, char **argv) {
-	int try = 0, unauth = 1, user_only = 1;
+	int try = 0, user_only = 1;
 	userinfo_t *u = &user;
 
 	oldvt = oldsysrq = oldprintk = vt.nr = vt.fd = -1;
@@ -166,17 +166,16 @@ int main(int argc, char **argv) {
 
 	openlog(progname, LOG_PID, LOG_AUTH);
 
-	while (unauth) {
+	for (;;) {
 		fprintf(vt.ios, "User: %s\n", u->name);
-		unauth = authenticate(u);
-		if (unauth) {
-			if (!user_only && (u == &root || ++try == 3)) {
-				u = u == &root ? &user : &root;
-				try = 0;
-			}
-			fprintf(vt.ios, "Authentication failed\n\n");
-			syslog(LOG_WARNING, "Authentication failure");
+		if (authenticate(u) == 0)
+			break;
+		if (!user_only && (u == &root || ++try == 3)) {
+			u = u == &root ? &user : &root;
+			try = 0;
 		}
+		fprintf(vt.ios, "Authentication failed\n\n");
+		syslog(LOG_WARNING, "Authentication failure");
 	}
 
 	return 0;
