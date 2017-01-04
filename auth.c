@@ -63,12 +63,14 @@ void get_user(userinfo_t *uinfo, int vt, uid_t owner) {
 			}
 		}
 		fclose(uf);
-	} else if (owner != (uid_t)-1 && (pw = getpwuid(owner)) != NULL) {
-		uinfo->name = estrdup(pw->pw_name);
 	}
 
-	if (uinfo->name == NULL)
-		error(EXIT_FAILURE, 0, "Unable to detect user of tty%d", vt);
+	if (uinfo->name == NULL) {
+		if (owner != (uid_t)-1 && (pw = getpwuid(owner)) != NULL)
+			uinfo->name = estrdup(pw->pw_name);
+		else
+			error(EXIT_FAILURE, 0, "Unable to detect user of tty%d", vt);
+	}
 
 	get_pam(uinfo);
 }
