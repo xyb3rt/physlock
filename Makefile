@@ -1,7 +1,7 @@
 VERSION  := git-20170104
 
 CC       ?= gcc
-PREFIX   := /usr/local
+PREFIX   ?= /usr/local
 CFLAGS   += -Wall -pedantic
 CPPFLAGS += -DVERSION=\"$(VERSION)\" -D_XOPEN_SOURCE=500
 LDFLAGS  +=
