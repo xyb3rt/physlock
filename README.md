@@ -52,5 +52,6 @@ The following command-line arguments are supported:
     -l       only lock console switching
     -L       only enable console switching
     -m       mute kernel messages on console while physlock is running
+    -p MSG   Display MSG before the password prompt
     -s       disable sysrq key while physlock is running
     -v       print version information and exit

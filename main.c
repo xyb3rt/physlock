@@ -167,6 +167,10 @@ int main(int argc, char **argv) {
 
 	openlog(progname, LOG_PID, LOG_AUTH);
 
+	if (options->prompt != NULL && options->prompt[0] != '\0') {
+		fprintf(vt.ios, "%s\n\n", options->prompt);
+	}
+
 	for (;;) {
 		if (u == &root) {
 			fputs("root: ", vt.ios);
