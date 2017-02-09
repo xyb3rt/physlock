@@ -167,6 +167,10 @@ int main(int argc, char **argv) {
 
 	openlog(progname, LOG_PID, LOG_AUTH);
 
+	if (options->prompt != NULL && options->prompt[0] != '\0') {
+		printf("%s\n", options->prompt);
+	}
+
 	for (;;) {
 		fprintf(vt.ios, "User: %s\n", u->name);
 		if (authenticate(u) == 0)

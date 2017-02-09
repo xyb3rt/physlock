@@ -37,6 +37,7 @@ void print_version() {
 
 void parse_options(int argc, char **argv) {
 	int opt;
+	extern char *optarg;
 	
 	progname = strrchr(argv[0], '/');
 	progname = progname != NULL ? progname + 1 : argv[0];
@@ -46,7 +47,7 @@ void parse_options(int argc, char **argv) {
 	_options.lock_switch = -1;
 	_options.mute_kernel_messages = 0;
 
-	while ((opt = getopt(argc, argv, "dhLlmsv")) != -1) {
+	while ((opt = getopt(argc, argv, "dhLlmsp:v")) != -1) {
 		switch (opt) {
 			case '?':
 				print_usage();
@@ -68,6 +69,9 @@ void parse_options(int argc, char **argv) {
 				break;
 			case 's':
 				_options.disable_sysrq = 1;
+				break;
+			case 'p':
+				_options.prompt = optarg;
 				break;
 			case 'v':
 				print_version();
