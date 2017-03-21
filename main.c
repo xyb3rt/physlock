@@ -86,6 +86,7 @@ void cleanup() {
 	vt_lock_switch(0);
 	vt_release(&vt, oldvt);
 	vt_destroy();
+    error_close();
 }
 
 void sa_handler_exit(int signum) {
@@ -179,6 +180,7 @@ int main(int argc, char **argv) {
 	dup2(vt.fd, 1);
 	dup2(vt.fd, 2);
 
+    // print /etc/issue
     if (!options->disable_issue) {
         print_issue_file(vt, oldvt);
     }

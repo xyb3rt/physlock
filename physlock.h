@@ -74,6 +74,7 @@ int get_user_utmp(userinfo_t*, int);
 extern const char *progname;
 
 void error_init(int);
+void error_close(void);
 void error(int, int, const char*, ...);
 char* estrdup(const char*);
 int read_int_from_file(const char*, char);

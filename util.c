@@ -34,6 +34,12 @@ void error_init(int fd)
 		Stderr = stderr;
 }
 
+void error_close()
+{
+    if(Stderr != NULL)
+        fclose(Stderr);
+}
+
 void error(int eval, int err, const char* fmt, ...)
 {
 	va_list ap;
