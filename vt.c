@@ -125,20 +125,26 @@ CLEANUP int vt_release(vt_t *vt, int nr) {
 		return -1;
 	}
 
-	if (vt->ios != NULL) {
-		fclose(vt->ios);
-		vt->ios = NULL;
-		vt->fd = -1;
-	}
+    if (vt->ios != NULL) {
+        fclose(vt->ios);
+        vt->ios = NULL;
+        vt->fd = -1;
+    }
 
-	if (vt->nr > 0) {
-		while ((ret = ioctl(fd, VT_DISALLOCATE, vt->nr)) == -1 && errno == EINTR);
-		if (ret == -1) {
-			error(0, errno, "%s: VT_DISALLOCATE", CONSOLE_DEVICE);
-			return -1;
-		}
-		vt->nr = -1;
-	}
+    if (vt->nr > 0) {
+        while ((ret = ioctl(fd, VT_DISALLOCATE, vt->nr)) == -1 && errno == EINTR);
+        if (ret < 0) {
+            // lets use scrollback to clear screen
+            if (fd < 0)
+                return fd;
+            ret = write(fd, "\033[r\033[H\033[3J", 10);
+            if (ret < 0) {
+                error(0, errno, "Unable to clear screen");
+                return -1;
+            }
+        }
+        vt->nr = -1;
+    }
 	return 0;
 }
 
