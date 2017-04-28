@@ -1,4 +1,5 @@
-VERSION  := git-20170104
+VERSION  := git-20170428
+DATE     := April 28th, 2017
 
 CC       ?= gcc
 PREFIX   := /usr/local
@@ -28,7 +29,7 @@ physlock: $(OBJ)
 install: all
 	install -D -m 4755 -o root -g root physlock $(DESTDIR)$(PREFIX)/bin/physlock
 	mkdir -p $(DESTDIR)$(PREFIX)/share/man/man1
-	sed "s/VERSION/$(VERSION)/g" physlock.1 > $(DESTDIR)$(PREFIX)/share/man/man1/physlock.1
+	sed "s/DATE/$(DATE)/g" physlock.1 > $(DESTDIR)$(PREFIX)/share/man/man1/physlock.1
 	chmod 644 $(DESTDIR)$(PREFIX)/share/man/man1/physlock.1
 
 clean:

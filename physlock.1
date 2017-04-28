@@ -1,52 +1,62 @@
-.TH PHYSLOCK 1 physlock\-VERSION
-.SH NAME
-physlock \- lock all consoles / virtual terminals
-.SH SYNOPSIS
-.B physlock
-.RB [ \-dhLlmsv ]
-.SH DESCRIPTION
-physlock is an alternative to vlock, it is equivalent to `vlock \-an'. It is
-written because vlock blocks some linux kernel mechanisms like hibernate and
-suspend and can therefore only be used with some limitations.
-.P
-physlock is designed to be lightweight, but highly depends on the kernels ioctl
+.Dd DATE
+.Dt PHYSLOCK 1
+.Os Linux
+.Sh NAME
+.Nm physlock
+.Nd lock all consoles / virtual terminals
+.Sh SYNOPSIS
+.Nm
+.Op Fl dhLlmsv
+.Sh DESCRIPTION
+.Nm
+is an alternative to
+.Xr vlock 1 ,
+it is equivalent to
+.Ic vlock -an .
+It is written because vlock blocks some linux kernel mechanisms like hibernate
+and suspend and can therefore only be used with some limitations.
+.Pp
+physlock is designed to be lightweight,
+but highly depends on the kernel's
+.Xr ioctl 2
 API.
-.P
-The behaviour of physlock is completely controlled via command-line arguments,
+.Pp
+The behaviour of
+.Nm
+is completely controlled via command-line arguments,
 it does not rely on environment variables.
-physlock uses the utmp file to identify the owner of the current session (i.e.
-active tty) and prompts for her password to unlock the computer.
-.SH OPTIONS
-.TP
-.B \-d
-Fork and detach physlock before prompting for authentication. The parent
-process returns right after everything is set up, so this option is useful for
-use in suspend/hibernate scripts.
-.TP
-.B \-h
+.Nm
+uses the utmp file to identify the owner of the current session
+(i.e.  active tty) and prompts for her password to unlock the computer.
+.Sh OPTIONS
+The arguments are as follows:
+.Bl -tag -width Ds
+.It Fl d
+Fork and detach physlock before prompting for authentication.
+The parent process returns right after everything is set up,
+so this option is useful for use in suspend/hibernate scripts.
+.It Fl h
 Print brief usage information to standard output and exit.
-.TP
-.B \-l
+.It Fl L
+Only enable (unlock) console switching and exit.
+This is useful when a prior instance of physlock has crashed and left the
+console switching mechanism locked.
+.It Fl l
 Only lock console switching and exit.
-.TP
-.B \-L
-Only enable (unlock) console switching and exit. This is useful when a prior
-instance of physlock has crashed and leaved the console switching mechanism
-locked.
-.TP
-.B \-m
+.It Fl m
 Mute kernel messages on console while physlock is running.
-.TP
-.B \-s
+.It Fl s
 Disable SysRq mechanism while physlock is running.
-.TP
-.B \-v
+.It Fl v
 Print version information to standard output and exit.
-.SH AUTHORS
-.TP
-Bert Muennich <ber.t at gmx.com>
-.SH HOMEPAGE
-.TP
-http://github.com/muennich/physlock
-.SH SEE ALSO
-.BR vlock (1)
+.El
+.Sh SEE ALSO
+.Xr vlock 1 ,
+.Xr tty 4
+.Pp
+The
+.Nm
+homepage can be found at
+.Lk http://github.com/muennich/physlock
+.Sh AUTHORS
+.An Bert Muennich Aq Mt ber.t at gmx.com
