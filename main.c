@@ -168,15 +168,15 @@ int main(int argc, char **argv) {
 	openlog(progname, LOG_PID, LOG_AUTH);
 
 	for (;;) {
-		fprintf(vt.ios, "User: %s\n", u->name);
 		if (authenticate(u) == 0)
 			break;
-		if (!user_only && (u == &root || ++try == 3)) {
-			u = u == &root ? &user : &root;
-			try = 0;
-		}
 		fprintf(vt.ios, "Authentication failed\n\n");
 		syslog(LOG_WARNING, "Authentication failure");
+		if (!user_only && (u == &root || ++try == 3)) {
+			u = u == &root ? &user : &root;
+			fprintf(vt.ios, "Switched to %s\n", u == &root ? "root" : "user");
+			try = 0;
+		}
 	}
 
 	return 0;
