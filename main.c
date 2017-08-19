@@ -67,10 +67,28 @@ void setup_signal(int signum, void (*handler)(int)) {
 	sigact.sa_flags = 0;
 	sigact.sa_handler = handler;
 	sigemptyset(&sigact.sa_mask);
-	
+
 	if (sigaction(signum, &sigact, NULL) < 0)
 		error(0, errno, "signal %d", signum);
 }
+
+
+void print_motd(FILE *terminal, const char *filename) {
+	FILE *file = fopen(filename, "rb");
+	char buf[4096];
+	int r = 0;
+	if (file) {
+		while ((r = fread(buf, sizeof(*buf), sizeof(buf), file)) > 0) {
+			for (int i = 0; i < r; ++i) {
+				putc(buf[i], terminal);
+			}
+		}
+		fclose(file);
+	} else {
+		fprintf(terminal, "ERROR loading file %s", filename);
+	}
+}
+
 
 void prompt(FILE *stream, const char *fmt, ...) {
 	va_list args;
@@ -171,6 +189,10 @@ int main(int argc, char **argv) {
 		fprintf(vt.ios, "%s\n\n", options->prompt);
 	}
 
+	if (options->motd_file != NULL) {
+		print_motd(vt.ios, options->motd_file);
+	}
+
 	for (;;) {
 		if (u == &root) {
 			fputs("root: ", vt.ios);
@@ -185,6 +207,5 @@ int main(int argc, char **argv) {
 		fprintf(vt.ios, "Authentication failed\n\n");
 		syslog(LOG_WARNING, "Authentication failure");
 	}
-
 	return 0;
 }
