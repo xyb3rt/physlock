@@ -5,7 +5,7 @@ PREFIX   := /usr/local
 CFLAGS   += -Wall -pedantic
 CPPFLAGS += -DVERSION=\"$(VERSION)\" -D_XOPEN_SOURCE=500
 LDFLAGS  +=
-LIBS     := -lpam -lpam_misc
+LIBS     := -lpam -lpam_misc -lsystemd
 
 .PHONY: clean install uninstall
 

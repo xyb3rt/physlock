@@ -30,6 +30,7 @@ typedef struct userinfo_s {
 } userinfo_t;
 
 void get_user(userinfo_t*, int, uid_t);
+void get_user_systemd(userinfo_t*, int, uid_t);
 void get_root(userinfo_t*);
 CLEANUP void free_user(userinfo_t*);
 int authenticate(userinfo_t*);

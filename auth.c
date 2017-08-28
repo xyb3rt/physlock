@@ -25,6 +25,7 @@
 #include <utmp.h>
 #include <errno.h>
 #include <security/pam_misc.h>
+#include <systemd/sd-login.h>
 
 #include "auth.h"
 #include "util.h"
@@ -64,6 +65,43 @@ void get_user(userinfo_t *uinfo, int vt, uid_t owner) {
 		}
 		fclose(uf);
 	}
+
+	if (uinfo->name == NULL) {
+		if (owner != (uid_t)-1 && (pw = getpwuid(owner)) != NULL)
+			uinfo->name = estrdup(pw->pw_name);
+		else
+			error(EXIT_FAILURE, 0, "Unable to detect user of tty%d", vt);
+	}
+
+	get_pam(uinfo);
+}
+
+void get_user_systemd(userinfo_t *uinfo, int vt, uid_t owner) {
+	char **sessions = NULL;
+	int entries = 0;
+	unsigned sess_vt;
+	uid_t sess_uid;
+	struct passwd *pw = NULL;
+
+	if (0 > (entries = sd_get_sessions(&sessions)))
+		error(EXIT_FAILURE, 0, "Unable to detect user of tty%d", vt);
+
+	uinfo->name = NULL;
+	for (unsigned i = 0; i < entries; ++i) {
+		if (0 > sd_session_get_vt(sessions[i], &sess_vt))
+			continue;
+		if (sess_vt == (unsigned)vt) {
+			if (0 > sd_session_get_uid(sessions[i], &sess_uid))
+				continue;
+			pw = getpwuid(sess_uid);
+			uinfo->name = estrdup(pw->pw_name);
+			break;
+		}
+	}
+
+	if (sessions)
+		for (unsigned i = 0; i < entries; ++i)
+			free(sessions[i]);
 
 	if (uinfo->name == NULL) {
 		if (owner != (uid_t)-1 && (pw = getpwuid(owner)) != NULL)

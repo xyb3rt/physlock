@@ -3,7 +3,7 @@
 physlock \- lock all consoles / virtual terminals
 .SH SYNOPSIS
 .B physlock
-.RB [ \-dhLlmsv ]
+.RB [ \-dhLlmsUv ]
 .RB [ \-p
 .IR MSG ]
 .SH DESCRIPTION
@@ -46,6 +46,9 @@ before the password prompt.
 .TP
 .B \-s
 Disable SysRq mechanism while physlock is running.
+.TP
+.B \-U
+Do not use utmp to discover the user owning the running VT but use systemd.
 .TP
 .B \-v
 Print version information to standard output and exit.
