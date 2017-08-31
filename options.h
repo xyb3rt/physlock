@@ -24,7 +24,6 @@ typedef struct options_s {
 	int disable_sysrq;
 	int lock_switch;
 	int mute_kernel_messages;
-	int use_systemd;
 	const char *prompt;
 } options_t;
 

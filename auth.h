@@ -19,6 +19,7 @@
 #ifndef AUTH_H
 #define AUTH_H
 
+#include <sys/types.h>
 #include <security/pam_appl.h>
 
 #define CLEANUP
@@ -29,9 +30,9 @@ typedef struct userinfo_s {
 	pam_handle_t *pamh;
 } userinfo_t;
 
-void get_user(userinfo_t*, int, uid_t);
-void get_user_systemd(userinfo_t*, int, uid_t);
-void get_root(userinfo_t*);
+void get_user(userinfo_t*, int, uid_t); /* in session_*.c */
+void get_user_by_id(userinfo_t*, uid_t);
+void get_user_by_name(userinfo_t*, const char*);
 CLEANUP void free_user(userinfo_t*);
 int authenticate(userinfo_t*);
 

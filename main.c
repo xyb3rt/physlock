@@ -123,11 +123,8 @@ int main(int argc, char **argv) {
 		return 0;
 	}
 
-	if (options->use_systemd)
-		get_user_systemd(&user, oldvt, owner);
-	else
-		get_user(&user, oldvt, owner);
-	get_root(&root);
+	get_user(&user, oldvt, owner);
+	get_user_by_id(&root, 0);
 	if (strcmp(user.name, root.name) != 0)
 		user_only = 0;
 
