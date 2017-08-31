@@ -50,6 +50,9 @@ void cleanup() {
 		write_int_to_file(SYSRQ_PATH, oldsysrq);
 	if (oldprintk > 1)
 		write_int_to_file(PRINTK_PATH, oldprintk);
+	close(0);
+	close(1);
+	close(2);
 	if (vt.fd >= 0)
 		vt_reset(&vt);
 	vt_lock_switch(0);
