@@ -23,9 +23,11 @@ void get_user(userinfo_t *uinfo, int vt, uid_t owner) {
 		}
 	}
 
-	for (i = 0; i < n; i++)
-		free(sessions[i]);
-	free(sessions);
+        if (sessions) {
+		for (i = 0; i < n; i++)
+			free(sessions[i]);
+		free(sessions);
+        }
 
 	if (found)
 		get_user_by_id(uinfo, sess_uid);
