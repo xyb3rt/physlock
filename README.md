@@ -1,41 +1,42 @@
 Control physical access to a linux computer by locking all of its virtual
-terminals / consoles.
+terminals.
 
-physlock is an alternative to vlock, it is equivalent to `vlock -an'. It is
-written because vlock blocks some linux kernel mechanisms like hibernate and
-suspend and can therefore only be used with some limitations.
-physlock is designed to be more lightweight, it does not have a plugin
-interface and it is not started using a shell script wrapper.
+physlock only allows the user of the active session (the user logged in on the
+foreground virtual terminal) and the root user to unlock the computer and uses
+PAM for authentication.
 
-physlock tries to detect the user logged in on the active console by first
-searching the utmp file for an entry whose `ut_line` field equals the device
-name of the active console, e.g. "tty1". If no such entry is found, then
-physlock falls back to the owner of the device file of the active console. Some
-graphical login managers do neither write an appropriate utmp entry nor set the
-owner of the device file. You have to manually set up `sessreg(1)` in order to
-use physlock with such a graphical login manager.
+physlock supports 3 mechanisms to detect the user of the active session:
+
+    1. *login*: Using the owner of the corresponding tty device file typically
+       set by login(1)
+    2. *utmp*: Searching the utmp file for an entry whose `ut_line` field
+       equals the tty device name
+    3. *systemd*: Querying systemd-logind(1)
+
+The used mechanism is selected at build time by setting the `SESSION` macro.
+The default is `utmp`.
 
 Installation
 ------------
-physlock is built using the commands:
+physlock is build using the commands:
 
     $ make
     # make install
 
 Please note, that the latter one requires root privileges.
-By default, physlock is installed using the prefix "/usr/local", so the full
-path of the executable will be "/usr/local/bin/physlock".
+By default, physlock is installed using the prefix `/usr/local`, so the full
+path of the executable will be `/usr/local/bin/physlock`.
 
-You can install it into a directory of your choice by changing the second
-command to:
+You can install it into a directory of your choice by overwriting the `PREFIX`
+macro in the second command:
 
     # make PREFIX="/your/dir" install
 
 Please also note, that the physlock executable will have root ownership and the
 setuid bit set.
 
-All build-time specific settings are set via preprocessor macros in the file
-"config.h". Please check and change them, so that they fit your needs.
+All build-time specific settings are set in the file `config.h`. Please check
+and change them, so that they fit your needs.
 
 Usage
 -----
