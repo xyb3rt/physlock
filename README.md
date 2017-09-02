@@ -7,11 +7,11 @@ PAM for authentication.
 
 physlock supports 3 mechanisms to detect the user of the active session:
 
-    1. *login*: Using the owner of the corresponding tty device file typically
-       set by login(1)
-    2. *utmp*: Searching the utmp file for an entry whose `ut_line` field
-       equals the tty device name
-    3. *systemd*: Querying systemd-logind(1)
+1. *login*: Using the owner of the corresponding tty device file typically set
+   by login(1)
+2. *utmp*: Searching the utmp file for an entry whose `ut_line` field equals
+   the tty device name
+3. *systemd*: Querying systemd-logind(1)
 
 The used mechanism is selected at build time by setting the `SESSION` macro.
 The default is `utmp`.
