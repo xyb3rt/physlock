@@ -16,13 +16,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#include <paths.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <pwd.h>
 #include <unistd.h>
-#include <utmp.h>
 #include <errno.h>
 #include <security/pam_misc.h>
 
@@ -39,51 +37,18 @@ static void get_pam(userinfo_t *uinfo) {
 		error(EXIT_FAILURE, 0, "no pam for user %s", uinfo->name);
 }
 
-void get_user(userinfo_t *uinfo, int vt, uid_t owner) {
-	FILE *uf;
-	struct utmp r;
+void get_user_by_id(userinfo_t *uinfo, uid_t uid) {
 	struct passwd *pw;
-	char tty[16], name[UT_NAMESIZE+1];
 
-	uinfo->name = NULL;
-	while ((uf = fopen(_PATH_UTMP, "r")) == NULL && errno == EINTR);
+	while (errno = 0, (pw = getpwuid(uid)) == NULL && errno == EINTR);
+	if (pw == NULL)
+		error(EXIT_FAILURE, 0, "No password file entry for uid %u found", uid);
 
-	if (uf != NULL) {
-		snprintf(tty, sizeof(tty), "tty%d", vt);
-		while (!feof(uf) && !ferror(uf)) {
-			if (fread(&r, sizeof(r), 1, uf) != 1)
-				continue;
-			if (r.ut_type != USER_PROCESS || r.ut_user[0] == '\0')
-				continue;
-			if (strcmp(r.ut_line, tty) == 0) {
-				strncpy(name, r.ut_user, UT_NAMESIZE);
-				name[UT_NAMESIZE] = '\0';
-				uinfo->name = estrdup(name);
-				break;
-			}
-		}
-		fclose(uf);
-	}
-
-	if (uinfo->name == NULL) {
-		if (owner != (uid_t)-1 && (pw = getpwuid(owner)) != NULL)
-			uinfo->name = estrdup(pw->pw_name);
-		else
-			error(EXIT_FAILURE, 0, "Unable to detect user of tty%d", vt);
-	}
-
-	get_pam(uinfo);
+	get_user_by_name(uinfo, pw->pw_name);
 }
 
-void get_root(userinfo_t *uinfo) {
-	struct passwd *pw;
-
-	while (errno = 0, (pw = getpwuid(0)) == NULL && errno == EINTR);
-	if (pw == NULL)
-		error(EXIT_FAILURE, 0, "No password file entry for uid 0 found");
-
-	uinfo->name = estrdup(pw->pw_name);
-
+void get_user_by_name(userinfo_t *uinfo, const char *name) {
+	uinfo->name = estrdup(name);
 	get_pam(uinfo);
 }
 

@@ -1,4 +1,4 @@
-VERSION  := git-20170831
+VERSION  := git-20170902
 
 CC       ?= gcc
 PREFIX   := /usr/local
@@ -7,9 +7,17 @@ CPPFLAGS += -DVERSION=\"$(VERSION)\" -D_XOPEN_SOURCE=500
 LDFLAGS  +=
 LIBS     := -lpam -lpam_misc
 
+# select user detection mechanism
+# overwritten with `make SESSION={login,systemd,utmp}`
+SESSION := utmp
+
+ifeq ($(SESSION),systemd)
+	LIBS += -lsystemd
+endif
+
 .PHONY: clean install uninstall
 
-SRC := auth.c main.c options.c util.c vt.c
+SRC := auth.c main.c options.c session_$(SESSION).c util.c vt.c
 DEP := $(SRC:.c=.d)
 OBJ := $(SRC:.c=.o)
 

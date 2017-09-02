@@ -127,7 +127,7 @@ int main(int argc, char **argv) {
 	}
 
 	get_user(&user, oldvt, owner);
-	get_root(&root);
+	get_user_by_id(&root, 0);
 	if (strcmp(user.name, root.name) != 0)
 		user_only = 0;
 
