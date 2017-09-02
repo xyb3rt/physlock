@@ -45,14 +45,18 @@ void parse_options(int argc, char **argv) {
 	_options.disable_sysrq = 0;
 	_options.lock_switch = -1;
 	_options.mute_kernel_messages = 0;
+	_options.motd_file = NULL;
 
-	while ((opt = getopt(argc, argv, "dhLlmp:sv")) != -1) {
+	while ((opt = getopt(argc, argv, "df:hLlmp:sv")) != -1) {
 		switch (opt) {
 			case '?':
 				print_usage();
 				exit(1);
 			case 'd':
 				_options.detach = 1;
+				break;
+			case 'f':
+				_options.motd_file = optarg;
 				break;
 			case 'h':
 				print_usage();
