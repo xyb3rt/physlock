@@ -96,7 +96,7 @@ void prompt(FILE *stream, const char *fmt, ...) {
 }
 
 int main(int argc, char **argv) {
-	int try = 0, user_only = 1;
+	int try = 0, root_user = 1;
 	uid_t owner;
 	userinfo_t *u = &user;
 
@@ -129,7 +129,9 @@ int main(int argc, char **argv) {
 	get_user(&user, oldvt, owner);
 	get_user_by_id(&root, 0);
 	if (strcmp(user.name, root.name) != 0)
-		user_only = 0;
+		root_user = 0;
+	else
+		u = &root;
 
 	atexit(cleanup);
 
@@ -176,12 +178,12 @@ int main(int argc, char **argv) {
 
 	for (;;) {
 		if (u == &root) {
-			fputs("root: ", vt.ios);
+			fprintf(vt.ios, "%s: ", root.name);
 			fflush(vt.ios);
 		}
 		if (authenticate(u) == 0)
 			break;
-		if (!user_only && (u == &root || ++try == 3)) {
+		if (!root_user && (u == &root || ++try == 3)) {
 			u = u == &root ? &user : &root;
 			try = 0;
 		}
