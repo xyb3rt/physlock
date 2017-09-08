@@ -19,7 +19,7 @@ SRC := auth.c main.c options.c session_$(SESSION).c util.c vt.c
 DEP := $(SRC:.c=.d)
 OBJ := $(SRC:.c=.o)
 
-$(OBJ): Makefile
+$(OBJ): Makefile config.h
 
 physlock: $(OBJ)
 	@echo "LINK $@"
@@ -28,6 +28,10 @@ physlock: $(OBJ)
 %.o: %.c
 	@echo "CC $<"
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(DEPFLAGS) -c -o $@ $<
+
+config.h:
+	@echo "GEN $@"
+	cp $(SRCDIR)/config.def.h $@
 
 clean:
 	rm -f physlock $(DEP) $(OBJ)

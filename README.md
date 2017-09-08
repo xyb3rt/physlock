@@ -36,7 +36,10 @@ Please also note, that the physlock executable will have root ownership and the
 setuid bit set.
 
 All build-time specific settings are set in the file `config.h`. Please check
-and change them, so that they fit your needs.
+and change them, so that they fit your needs. If the file `config.h` does not
+already exist, then you have to create it with the following command:
+
+    $ make config.h
 
 Usage
 -----
