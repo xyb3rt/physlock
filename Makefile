@@ -5,7 +5,9 @@ VERSION := git-20170908
 
 include config.mk
 
-CPPFLAGS += -DVERSION=\"$(VERSION)\"
+VPATH := $(SRCDIR)
+
+CPPFLAGS += -I. -DVERSION=\"$(VERSION)\"
 DEPFLAGS := -MMD -MP
 
 LDLIBS := -lpam -lpam_misc
