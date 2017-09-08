@@ -1,7 +1,6 @@
 VERSION := git-20170908
 
-.PHONY: all clean install uninstall
-.SUFFIXES:
+all: physlock
 
 include config.mk
 
@@ -20,11 +19,7 @@ SRC := auth.c main.c options.c session_$(SESSION).c util.c vt.c
 DEP := $(SRC:.c=.d)
 OBJ := $(SRC:.c=.o)
 
-all: physlock
-
 $(OBJ): Makefile
-
--include $(DEP)
 
 physlock: $(OBJ)
 	@echo "LINK $@"
@@ -51,5 +46,9 @@ uninstall:
 	@echo "REMOVE physlock.1"
 	rm -f $(DESTDIR)$(MANPREFIX)/man1/physlock.1
 
+.PHONY: all clean install uninstall
+.SUFFIXES:
 $(V).SILENT:
+
+-include $(DEP)
 
