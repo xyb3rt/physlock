@@ -27,20 +27,29 @@ $(OBJ): Makefile
 -include $(DEP)
 
 physlock: $(OBJ)
+	@echo "LINK $@"
 	$(CC) $(LDFLAGS) -o $@ $^ $(LDLIBS)
 
 %.o: %.c
+	@echo "CC $<"
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(DEPFLAGS) -c -o $@ $<
-
-install: all
-	install -D -m 4755 -o root -g root physlock $(DESTDIR)$(PREFIX)/bin/physlock
-	mkdir -p $(DESTDIR)$(MANPREFIX)/man1
-	sed "s/VERSION/$(VERSION)/g" physlock.1 > $(DESTDIR)$(MANPREFIX)/man1/physlock.1
-	chmod 644 $(DESTDIR)$(MANPREFIX)/man1/physlock.1
 
 clean:
 	rm -f physlock $(DEP) $(OBJ)
 
+install: all
+	@echo "INSTALL bin/physlock"
+	install -D -m 4755 -o root -g root physlock $(DESTDIR)$(PREFIX)/bin/physlock
+	@echo "INSTALL physlock.1"
+	mkdir -p $(DESTDIR)$(MANPREFIX)/man1
+	sed "s/VERSION/$(VERSION)/g" physlock.1 > $(DESTDIR)$(MANPREFIX)/man1/physlock.1
+	chmod 644 $(DESTDIR)$(MANPREFIX)/man1/physlock.1
+
 uninstall:
+	@echo "REMOVE bin/physlock"
 	rm -f $(DESTDIR)$(PREFIX)/bin/physlock
+	@echo "REMOVE physlock.1"
 	rm -f $(DESTDIR)$(MANPREFIX)/man1/physlock.1
+
+$(V).SILENT:
+
