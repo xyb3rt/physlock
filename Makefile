@@ -26,7 +26,7 @@ physlock: $(OBJ)
 	$(CC) $(LDFLAGS) -o $@ $^ $(LDLIBS)
 
 %.o: %.c
-	@echo "CC $<"
+	@echo "CC $@"
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(DEPFLAGS) -c -o $@ $<
 
 config.h:
