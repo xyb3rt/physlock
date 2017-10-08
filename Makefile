@@ -7,7 +7,6 @@ all: physlock
 include config.mk
 
 CPPFLAGS += -I. -DVERSION=\"$(VERSION)\"
-DEPFLAGS := -MMD -MP
 
 LDLIBS := -lpam -lpam_misc
 
