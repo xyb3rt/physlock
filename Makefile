@@ -4,8 +4,6 @@ all: physlock
 
 include config.mk
 
-VPATH := $(SRCDIR)
-
 CPPFLAGS += -I. -DVERSION=\"$(VERSION)\"
 DEPFLAGS := -MMD -MP
 
@@ -29,9 +27,9 @@ physlock: $(OBJ)
 	@echo "CC $@"
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(DEPFLAGS) -c -o $@ $<
 
-config.h:
+config.h: | config.def.h
 	@echo "GEN $@"
-	cp $(SRCDIR)/config.def.h $@
+	cp $| $@
 
 clean:
 	rm -f physlock $(DEP) $(OBJ)
