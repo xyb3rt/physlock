@@ -1,3 +1,5 @@
+# Requires GNU make 3.80 or later
+
 VERSION := git-20170918
 
 all: physlock
