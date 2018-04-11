@@ -1,5 +1,6 @@
-/* physlock: main.c
- * Copyright (c) 2013 Bert Muennich <be.muennich at gmail.com>
+/* Copyright 2013 Bert Muennich
+ *
+ * This file is part of physlock.
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the

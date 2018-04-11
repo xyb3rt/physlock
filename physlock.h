@@ -1,5 +1,6 @@
-/* physlock: physlock.h
- * Copyright (c) 2018 Bert Muennich
+/* Copyright 2018 Bert Muennich
+ *
+ * This file is part of physlock.
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
