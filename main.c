@@ -16,20 +16,15 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
+#include "physlock.h"
+#include "config.h"
+
 #include <stdlib.h>
-#include <stdio.h>
 #include <string.h>
-#include <stdarg.h>
 #include <unistd.h>
 #include <errno.h>
 #include <signal.h>
 #include <syslog.h>
-
-#include "auth.h"
-#include "config.h"
-#include "options.h"
-#include "util.h"
-#include "vt.h"
 
 static char buf[1024];
 static int oldvt;
@@ -193,3 +188,4 @@ int main(int argc, char **argv) {
 
 	return 0;
 }
+

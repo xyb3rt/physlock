@@ -1,8 +1,7 @@
+#include "physlock.h"
+
 #include <stdlib.h>
 #include <systemd/sd-login.h>
-
-#include "auth.h"
-#include "util.h"
 
 void get_user(userinfo_t *uinfo, int vt, uid_t owner) {
 	int found = 0, i, n;

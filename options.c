@@ -16,13 +16,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
+#include "physlock.h"
+
 #include <stdlib.h>
-#include <stdio.h>
 #include <string.h>
 #include <unistd.h>
-
-#include "options.h"
-#include "util.h"
 
 static options_t _options;
 const options_t *options = (const options_t*) &_options;
@@ -78,3 +76,4 @@ void parse_options(int argc, char **argv) {
 		}
 	}
 }
+

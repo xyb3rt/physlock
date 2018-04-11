@@ -34,18 +34,18 @@ physlock: $(OBJS)
 	@echo "LINK $@"
 	$(CC) $(LDFLAGS) $(ALL_CFLAGS) -o $@ $(OBJS) $(LDLIBS)
 
-$(OBJS): Makefile config.h
+$(OBJS): Makefile physlock.h config.h
 
 .c.o:
 	@echo "CC $@"
-	$(CC) $(ALL_CPPFLAGS) $(ALL_CFLAGS) -MMD -MP -c -o $@ $<
+	$(CC) $(ALL_CPPFLAGS) $(ALL_CFLAGS) -c -o $@ $<
 
 config.h:
 	@echo "GEN $@"
 	cp $(srcdir)/config.def.h $@
 
 clean:
-	rm -f *.o *.d physlock
+	rm -f *.o physlock
 
 install: all
 	@echo "INSTALL bin/physlock"
@@ -60,6 +60,4 @@ uninstall:
 	rm -f $(DESTDIR)$(PREFIX)/bin/physlock
 	@echo "REMOVE physlock.1"
 	rm -f $(DESTDIR)$(MANPREFIX)/man1/physlock.1
-
--include $(OBJS:.o=.d)
 

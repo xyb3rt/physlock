@@ -16,19 +16,17 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
+#include "physlock.h"
+#include "config.h"
+
 #include <fcntl.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <linux/vt.h>
 #include <sys/stat.h>
-#include <sys/types.h>
 #include <sys/ioctl.h>
 #include <errno.h>
-
-#include "config.h"
-#include "util.h"
-#include "vt.h"
 
 static int fd = -1;
 static char filename[1024];
@@ -153,3 +151,4 @@ CLEANUP void vt_reset(vt_t *vt) {
 	vt->term.c_lflag = vt->rlflag;
 	tcsetattr(vt->fd, TCSANOW, &vt->term);
 }
+

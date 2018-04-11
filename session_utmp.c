@@ -1,14 +1,12 @@
+#include "physlock.h"
+
 #include <paths.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <pwd.h>
 #include <unistd.h>
 #include <errno.h>
 #include <utmp.h>
-
-#include "auth.h"
-#include "util.h"
 
 void get_user(userinfo_t *uinfo, int vt, uid_t owner) {
 	FILE *uf;

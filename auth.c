@@ -16,16 +16,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#include <stdio.h>
+#include "physlock.h"
+
 #include <stdlib.h>
 #include <string.h>
 #include <pwd.h>
 #include <unistd.h>
 #include <errno.h>
 #include <security/pam_misc.h>
-
-#include "auth.h"
-#include "util.h"
 
 static struct pam_conv conv = {
 	misc_conv,
@@ -65,3 +63,4 @@ int authenticate(userinfo_t *uinfo) {
 
 	return uinfo->pam_status == PAM_SUCCESS ? 0 : -1;
 }
+
