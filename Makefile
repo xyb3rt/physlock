@@ -1,39 +1,51 @@
-# Requires GNU make 3.80 or later
+VERSION = git-20180411
 
-VERSION := git-20170918
+srcdir = .
+VPATH = $(srcdir)
+
+PREFIX = /usr/local
+MANPREFIX = $(PREFIX)/share/man
+
+CC = cc
+DEF_CFLAGS = -Wall -pedantic
+
+# user detection mechanism: login/systemd/utmp
+SESSION = utmp
+
+ALL_CFLAGS = $(DEF_CFLAGS) $(CFLAGS)
+REQ_CPPFLAGS = -I. -D_XOPEN_SOURCE=500 -DVERSION=\"$(VERSION)\"
+ALL_CPPFLAGS = $(REQ_CPPFLAGS) $(CPPFLAGS)
+
+LIB_SESSION_login =
+LIB_SESSION_systemd = -lsystemd
+LIB_SESSION_utmp =
+LDLIBS = -lpam -lpam_misc $(LIB_SESSION_$(SESSION))
+
+OBJS = auth.o main.o options.o session_$(SESSION).o util.o vt.o
 
 all: physlock
 
-include config.mk
+.PHONY: all clean install uninstall
+.SUFFIXES:
+.SUFFIXES: .c .o
+$(V).SILENT:
 
-override CPPFLAGS += -I. -DVERSION=\"$(VERSION)\"
-
-LDLIBS := -lpam -lpam_misc
-
-ifeq ($(SESSION),systemd)
-	LDLIBS += -lsystemd
-endif
-
-SRC := auth.c main.c options.c session_$(SESSION).c util.c vt.c
-DEP := $(SRC:.c=.d)
-OBJ := $(SRC:.c=.o)
-
-$(OBJ): Makefile config.h
-
-physlock: $(OBJ)
+physlock: $(OBJS)
 	@echo "LINK $@"
-	$(CC) $(LDFLAGS) -o $@ $^ $(LDLIBS)
+	$(CC) $(LDFLAGS) $(ALL_CFLAGS) -o $@ $(OBJS) $(LDLIBS)
 
-%.o: %.c
+$(OBJS): Makefile config.h
+
+.c.o:
 	@echo "CC $@"
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(DEPFLAGS) -c -o $@ $<
+	$(CC) $(ALL_CPPFLAGS) $(ALL_CFLAGS) -MMD -MP -c -o $@ $<
 
-config.h: | config.def.h
+config.h:
 	@echo "GEN $@"
-	cp $| $@
+	cp $(srcdir)/config.def.h $@
 
 clean:
-	rm -f physlock $(DEP) $(OBJ)
+	rm -f *.o *.d physlock
 
 install: all
 	@echo "INSTALL bin/physlock"
@@ -49,9 +61,5 @@ uninstall:
 	@echo "REMOVE physlock.1"
 	rm -f $(DESTDIR)$(MANPREFIX)/man1/physlock.1
 
-.PHONY: all clean install uninstall
-.SUFFIXES:
-$(V).SILENT:
-
--include $(DEP)
+-include $(OBJS:.o=.d)
 
