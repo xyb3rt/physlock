@@ -1,10 +1,11 @@
-VERSION = git-20180411
+VERCMD  ?= git describe 2> /dev/null
+VERSION := $(shell $(VERCMD) || cat VERSION)
 
 srcdir = .
 VPATH = $(srcdir)
 
-PREFIX = /usr/local
-MANPREFIX = $(PREFIX)/share/man
+PREFIX    ?= /usr/local
+MANPREFIX ?= $(PREFIX)/share/man
 
 CC = cc
 DEF_CFLAGS = -Wall -pedantic
