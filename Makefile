@@ -3,8 +3,8 @@ VERSION = git-20180411
 srcdir = .
 VPATH = $(srcdir)
 
-PREFIX = /usr/local
-MANPREFIX = $(PREFIX)/share/man
+PREFIX    ?= /usr/local
+MANPREFIX ?= $(PREFIX)/share/man
 
 CC = cc
 DEF_CFLAGS = -Wall -pedantic
