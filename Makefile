@@ -1,4 +1,4 @@
-VERSION = git-20180411
+VERSION = 11+
 
 srcdir = .
 VPATH = $(srcdir)
@@ -13,8 +13,10 @@ DEF_CFLAGS = -Wall -pedantic
 SESSION = utmp
 
 ALL_CFLAGS = $(DEF_CFLAGS) $(CFLAGS)
-REQ_CPPFLAGS = -I. -D_XOPEN_SOURCE=500 -DVERSION=\"$(VERSION)\"
-ALL_CPPFLAGS = $(REQ_CPPFLAGS) $(CPPFLAGS)
+REQ_CPPFLAGS = -I. -D_XOPEN_SOURCE=500
+CPPFLAGS_options = -DVERSION=\"$(VERSION)\" \
+  -DGIT_VERSION=\"$$(cd "$(srcdir)"; git describe --always 2>/dev/null)\"
+ALL_CPPFLAGS = $(REQ_CPPFLAGS) $(CPPFLAGS_$*) $(CPPFLAGS)
 
 LIB_SESSION_login =
 LIB_SESSION_systemd = -lsystemd

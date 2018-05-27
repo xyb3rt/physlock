@@ -31,7 +31,10 @@ void print_usage() {
 }
 
 void print_version() {
-	printf("physlock %s - lock all consoles\n", VERSION);
+	const char * v = VERSION;
+	const char * v_git = GIT_VERSION;
+
+	printf("physlock %s - lock all consoles\n", v_git[0] != '\0' ? v_git : v);
 }
 
 void parse_options(int argc, char **argv) {
