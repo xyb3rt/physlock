@@ -14,9 +14,7 @@ SESSION = utmp
 
 ALL_CFLAGS = $(DEF_CFLAGS) $(CFLAGS)
 REQ_CPPFLAGS = -I. -D_XOPEN_SOURCE=500
-CPPFLAGS_options = -DVERSION=\"$(VERSION)\" \
-  -DGIT_VERSION=\"$$(cd "$(srcdir)"; git describe --always 2>/dev/null)\"
-ALL_CPPFLAGS = $(REQ_CPPFLAGS) $(CPPFLAGS_$*) $(CPPFLAGS)
+ALL_CPPFLAGS = $(REQ_CPPFLAGS) $(CPPFLAGS)
 
 LIB_SESSION_login =
 LIB_SESSION_systemd = -lsystemd
@@ -37,6 +35,7 @@ physlock: $(OBJS)
 	$(CC) $(LDFLAGS) $(ALL_CFLAGS) -o $@ $(OBJS) $(LDLIBS)
 
 $(OBJS): Makefile physlock.h config.h
+options.o: version.h
 
 .c.o:
 	@echo "CC $@"
@@ -45,6 +44,14 @@ $(OBJS): Makefile physlock.h config.h
 config.h:
 	@echo "GEN $@"
 	cp $(srcdir)/config.def.h $@
+
+version.h: Makefile .git/index
+	@echo "GEN $@"
+	VERSION="$$(cd $(srcdir); git describe 2>/dev/null)"; \
+	[ -z "$$VERSION" ] && VERSION="$(VERSION)"; \
+	echo "#define VERSION \"$$VERSION\"" >$@
+
+.git/index:
 
 clean:
 	rm -f *.o physlock

@@ -18,6 +18,7 @@
  */
 
 #include "physlock.h"
+#include "version.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -31,10 +32,7 @@ void print_usage() {
 }
 
 void print_version() {
-	const char * v = VERSION;
-	const char * v_git = GIT_VERSION;
-
-	printf("physlock %s - lock all consoles\n", v_git[0] != '\0' ? v_git : v);
+	puts("physlock " VERSION);
 }
 
 void parse_options(int argc, char **argv) {
