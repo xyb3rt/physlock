@@ -11,7 +11,7 @@
 void get_user(userinfo_t *uinfo, int vt, uid_t owner) {
 	FILE *uf;
 	struct utmp r;
-	char tty[16], name[UT_NAMESIZE+1];
+	char tty[UT_LINESIZE+1], name[UT_NAMESIZE+1];
 
 	name[0] = '\0';
 	while ((uf = fopen(_PATH_UTMP, "r")) == NULL && errno == EINTR);
@@ -23,7 +23,7 @@ void get_user(userinfo_t *uinfo, int vt, uid_t owner) {
 				continue;
 			if (r.ut_type != USER_PROCESS || r.ut_user[0] == '\0')
 				continue;
-			if (strcmp(r.ut_line, tty) == 0) {
+			if (strncmp(r.ut_line, tty, UT_LINESIZE) == 0) {
 				strncpy(name, r.ut_user, UT_NAMESIZE);
 				name[UT_NAMESIZE] = '\0';
 				break;
