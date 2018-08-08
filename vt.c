@@ -98,7 +98,7 @@ void vt_acquire(vt_t *vt) {
 		error(EXIT_FAILURE, errno, "%s: VT_WAITACTIVE", CONSOLE_DEVICE);
 
 	tcgetattr(vt->fd, &vt->term);
-	vt->rlflag = vt->term.c_lflag;
+	memcpy(&vt->term_orig, &vt->term, sizeof(vt->term_orig));
 }
 
 void vt_reopen(vt_t *vt) {
@@ -143,13 +143,13 @@ CLEANUP int vt_release(vt_t *vt, int nr) {
 }
 
 void vt_secure(vt_t *vt) {
+	vt->term.c_iflag &= ~IXON;
 	vt->term.c_lflag &= ~(ECHO | ISIG);
 	tcsetattr(vt->fd, TCSANOW, &vt->term);
 }
 
 CLEANUP void vt_reset(vt_t *vt) {
 	fprintf(vt->ios, "\033[H\033[J"); /* clear the screen */
-	vt->term.c_lflag = vt->rlflag;
-	tcsetattr(vt->fd, TCSANOW, &vt->term);
+	tcsetattr(vt->fd, TCSANOW, &vt->term_orig);
 }
 

@@ -85,7 +85,7 @@ typedef struct vt_s {
 	FILE *ios;
 	int fd;
 	struct termios term;
-	tcflag_t rlflag;
+	struct termios term_orig;
 } vt_t;
 
 void vt_init();
