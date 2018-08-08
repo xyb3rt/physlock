@@ -25,7 +25,6 @@
 #include <unistd.h>
 #include <errno.h>
 #include <signal.h>
-#include <syslog.h>
 
 static char buf[1024];
 static int oldvt;
@@ -166,8 +165,6 @@ int main(int argc, char **argv) {
 	dup2(vt.fd, 1);
 	dup2(vt.fd, 2);
 
-	openlog(progname, LOG_PID, LOG_AUTH);
-
 	if (options->prompt != NULL && options->prompt[0] != '\0') {
 		fprintf(vt.ios, "%s\n\n", options->prompt);
 	}
@@ -184,7 +181,6 @@ int main(int argc, char **argv) {
 			try = 0;
 		}
 		fprintf(vt.ios, "Authentication failed\n\n");
-		syslog(LOG_WARNING, "Authentication failure");
 	}
 
 	return 0;
