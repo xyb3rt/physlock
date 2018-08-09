@@ -21,7 +21,7 @@ LIB_SESSION_systemd = -lsystemd
 LIB_SESSION_utmp =
 LDLIBS = -lpam -lpam_misc $(LIB_SESSION_$(SESSION))
 
-OBJS = auth.o main.o options.o session_$(SESSION).o util.o vt.o
+OBJS = main.o options.o session_$(SESSION).o util.o vt.o
 
 all: physlock
 

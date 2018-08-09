@@ -33,7 +33,7 @@
 #define CLEANUP
 
 
-/* auth.c */
+/* main.c */
 
 typedef struct userinfo_s {
 	const char *name;

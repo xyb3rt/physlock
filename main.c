@@ -24,7 +24,9 @@
 #include <string.h>
 #include <unistd.h>
 #include <errno.h>
+#include <pwd.h>
 #include <signal.h>
+#include <security/pam_misc.h>
 
 static int oldvt;
 static vt_t vt;
@@ -33,6 +35,36 @@ static int oldprintk;
 static pid_t chpid;
 static int locked;
 static userinfo_t root, user;
+
+static struct pam_conv conv = {
+	misc_conv,
+	NULL
+};
+
+static void get_pam(userinfo_t *uinfo) {
+	if (pam_start("physlock", uinfo->name, &conv, &uinfo->pamh) != PAM_SUCCESS)
+		error(EXIT_FAILURE, 0, "no pam for user %s", uinfo->name);
+}
+
+void get_user_by_id(userinfo_t *uinfo, uid_t uid) {
+	struct passwd *pw;
+
+	while (errno = 0, (pw = getpwuid(uid)) == NULL && errno == EINTR);
+	if (pw == NULL)
+		error(EXIT_FAILURE, 0, "No password file entry for uid %u found", uid);
+
+	get_user_by_name(uinfo, pw->pw_name);
+}
+
+void get_user_by_name(userinfo_t *uinfo, const char *name) {
+	uinfo->name = estrdup(name);
+	get_pam(uinfo);
+}
+
+CLEANUP void free_user(userinfo_t *uinfo) {
+	if (uinfo->pamh != NULL)
+		pam_end(uinfo->pamh, uinfo->pam_status);
+}
 
 void cleanup() {
 	if (options->detach && chpid > 0)
@@ -157,7 +189,8 @@ int main(int argc, char **argv) {
 			fprintf(vt.ios, "%s: ", root.name);
 			fflush(vt.ios);
 		}
-		if (authenticate(u) == 0)
+		u->pam_status = pam_authenticate(u->pamh, 0);
+		if (u->pam_status == PAM_SUCCESS)
 			break;
 		if (!root_user && (u == &root || ++try == 3)) {
 			u = u == &root ? &user : &root;
