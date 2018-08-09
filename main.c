@@ -26,7 +26,6 @@
 #include <errno.h>
 #include <signal.h>
 
-static char buf[1024];
 static int oldvt;
 static vt_t vt;
 static int oldsysrq;
@@ -70,26 +69,6 @@ void setup_signal(int signum, void (*handler)(int)) {
 	
 	if (sigaction(signum, &sigact, NULL) < 0)
 		error(0, errno, "signal %d", signum);
-}
-
-void prompt(FILE *stream, const char *fmt, ...) {
-	va_list args;
-	unsigned int c, i = 0;
-
-	va_start(args, fmt);
-	vfprintf(stream, fmt, args);
-	va_end(args);
-
-	for (;;) {
-		while ((c = fgetc(stream)) == EOF && errno == EINTR);
-		if (c == EOF || c == '\n')
-			break;
-		if (c != '\0' && i + 1 < sizeof(buf))
-			buf[i++] = (char) c;
-	}
-	if (ferror(stream))
-		error(EXIT_FAILURE, 0, "Error reading from console");
-	buf[i] = '\0';
 }
 
 int main(int argc, char **argv) {
