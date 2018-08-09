@@ -184,22 +184,36 @@ int main(int argc, char **argv) {
 
 	locked = 1;
 
-	for (;;) {
+	while (locked) {
+		if (!root_user && try >= (u == &root ? 1 : 3)) {
+			u = u == &root ? &user : &root;
+			try = 0;
+		}
 		if (u == &root) {
 			fprintf(vt.ios, "%s: ", root.name);
 			fflush(vt.ios);
 		}
 		u->pam_status = pam_authenticate(u->pamh, 0);
-		if (u->pam_status == PAM_SUCCESS)
+		switch (u->pam_status) {
+		case PAM_SUCCESS:
+			locked = 0;
 			break;
-		if (!root_user && (u == &root || ++try == 3)) {
-			u = u == &root ? &user : &root;
-			try = 0;
+		case PAM_AUTH_ERR:
+		case PAM_MAXTRIES:
+			fprintf(vt.ios, "Authentication failed\n\n");
+			try++;
+			break;
+		case PAM_ABORT:
+		case PAM_CRED_INSUFFICIENT:
+		case PAM_USER_UNKNOWN:
+			fprintf(vt.ios, "%s\n", pam_strerror(u->pamh, u->pam_status));
+			return EXIT_FAILURE;
+		default:
+			/* intermittent error? */
+			sleep(5);
+			break;
 		}
-		fprintf(vt.ios, "Authentication failed\n\n");
 	}
-
-	locked = 0;
 
 	return 0;
 }
