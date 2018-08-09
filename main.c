@@ -32,7 +32,7 @@ static vt_t vt;
 static int oldsysrq;
 static int oldprintk;
 static pid_t chpid;
-
+static int locked;
 static userinfo_t root, user;
 
 void cleanup() {
@@ -41,13 +41,15 @@ void cleanup() {
 		return;
 	free_user(&user);
 	free_user(&root);
-	if (oldsysrq > 0)
-		write_int_to_file(SYSRQ_PATH, oldsysrq);
-	if (oldprintk > 1)
-		write_int_to_file(PRINTK_PATH, oldprintk);
 	close(0);
 	close(1);
 	close(2);
+	if (oldprintk > 1)
+		write_int_to_file(PRINTK_PATH, oldprintk);
+	if (locked)
+		return;
+	if (oldsysrq > 0)
+		write_int_to_file(SYSRQ_PATH, oldsysrq);
 	if (vt.fd >= 0)
 		vt_reset(&vt);
 	vt_lock_switch(0);
@@ -169,6 +171,8 @@ int main(int argc, char **argv) {
 		fprintf(vt.ios, "%s\n\n", options->prompt);
 	}
 
+	locked = 1;
+
 	for (;;) {
 		if (u == &root) {
 			fprintf(vt.ios, "%s: ", root.name);
@@ -182,6 +186,8 @@ int main(int argc, char **argv) {
 		}
 		fprintf(vt.ios, "Authentication failed\n\n");
 	}
+
+	locked = 0;
 
 	return 0;
 }
