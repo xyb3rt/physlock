@@ -1,16 +1,16 @@
 VERSION = 11+
 
-srcdir = .
+srcdir ?= .
 VPATH = $(srcdir)
 
-PREFIX = /usr/local
-MANPREFIX = $(PREFIX)/share/man
+PREFIX ?= /usr/local
+MANPREFIX ?= $(PREFIX)/share/man
 
 CC = cc
 DEF_CFLAGS = -Wall -pedantic
 
 # user detection mechanism: login/systemd/utmp
-SESSION = utmp
+SESSION ?= utmp
 
 ALL_CFLAGS = $(DEF_CFLAGS) $(CFLAGS)
 REQ_CPPFLAGS = -I. -D_XOPEN_SOURCE=500
