@@ -41,6 +41,11 @@ already exist, then you have to create it with the following command:
 
     $ make config.h
 
+You also have to make sure that physlock works with your PAM configuration. If
+you have a restrictive PAM fallback config file `/etc/pam.d/other`, then you
+need to create a suitable PAM config file for physlock named
+`/etc/pam.d/physlock`. The sample `physlock.pam` should work for most users.
+
 Usage
 -----
 The behaviour of physlock is completely controlled via command-line arguments,

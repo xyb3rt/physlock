@@ -1,0 +1,8 @@
+#%PAM-1.0
+
+# Sample /etc/pam.d/physlock
+
+auth      include  system-auth
+account   include  system-auth
+password  include  system-auth
+session   include  system-auth
