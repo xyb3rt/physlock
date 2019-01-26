@@ -1,4 +1,4 @@
-VERSION = 11+
+version = 11+
 
 srcdir = .
 VPATH = $(srcdir)
@@ -6,22 +6,18 @@ VPATH = $(srcdir)
 PREFIX = /usr/local
 MANPREFIX = $(PREFIX)/share/man
 
-CC = cc
-DEF_CFLAGS = -Wall -pedantic
-
 # user detection mechanism: login/systemd/utmp
 SESSION = utmp
 
-ALL_CFLAGS = $(DEF_CFLAGS) $(CFLAGS)
-REQ_CPPFLAGS = -I. -D_XOPEN_SOURCE=500
-ALL_CPPFLAGS = $(REQ_CPPFLAGS) $(CPPFLAGS)
+cflags = -Wall -pedantic $(CFLAGS)
+cppflags = -I. $(CPPFLAGS) -D_XOPEN_SOURCE=500
 
-LIB_SESSION_login =
-LIB_SESSION_systemd = -lsystemd
-LIB_SESSION_utmp =
-LDLIBS = -lpam -lpam_misc $(LIB_SESSION_$(SESSION))
+lib_session_login =
+lib_session_systemd = -lsystemd
+lib_session_utmp =
+ldlibs = $(LDLIBS) -lpam -lpam_misc $(lib_session_$(SESSION))
 
-OBJS = main.o options.o session_$(SESSION).o util.o vt.o
+objs = main.o options.o session_$(SESSION).o util.o vt.o
 
 all: physlock
 
@@ -30,16 +26,16 @@ all: physlock
 .SUFFIXES: .c .o
 $(V).SILENT:
 
-physlock: $(OBJS)
+physlock: $(objs)
 	@echo "LINK $@"
-	$(CC) $(LDFLAGS) $(ALL_CFLAGS) -o $@ $(OBJS) $(LDLIBS)
+	$(CC) $(LDFLAGS) -o $@ $(objs) $(ldlibs)
 
-$(OBJS): Makefile physlock.h config.h
+$(objs): Makefile physlock.h config.h
 options.o: version.h
 
 .c.o:
 	@echo "CC $@"
-	$(CC) $(ALL_CPPFLAGS) $(ALL_CFLAGS) -c -o $@ $<
+	$(CC) $(cflags) $(cppflags) -c -o $@ $<
 
 config.h:
 	@echo "GEN $@"
@@ -47,9 +43,8 @@ config.h:
 
 version.h: Makefile .git/index
 	@echo "GEN $@"
-	VERSION="$$(cd $(srcdir); git describe 2>/dev/null)"; \
-	[ -z "$$VERSION" ] && VERSION="$(VERSION)"; \
-	echo "#define VERSION \"$$VERSION\"" >$@
+	v="$$(cd $(srcdir); git describe 2>/dev/null)"; \
+	echo "#define VERSION \"$${v:-$(version)}\"" >$@
 
 .git/index:
 
@@ -61,7 +56,7 @@ install: all
 	install -D -m 4755 -o root -g root physlock $(DESTDIR)$(PREFIX)/bin/physlock
 	@echo "INSTALL physlock.1"
 	mkdir -p $(DESTDIR)$(MANPREFIX)/man1
-	sed "s/VERSION/$(VERSION)/g" physlock.1 > $(DESTDIR)$(MANPREFIX)/man1/physlock.1
+	sed "s/VERSION/$(version)/g" physlock.1 > $(DESTDIR)$(MANPREFIX)/man1/physlock.1
 	chmod 644 $(DESTDIR)$(MANPREFIX)/man1/physlock.1
 
 uninstall:
