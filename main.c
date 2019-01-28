@@ -43,7 +43,7 @@ static struct pam_conv conv = {
 
 static void get_pam(userinfo_t *uinfo) {
 	if (pam_start("physlock", uinfo->name, &conv, &uinfo->pamh) != PAM_SUCCESS)
-		error(EXIT_FAILURE, 0, "no pam for user %s", uinfo->name);
+		error(EXIT_FAILURE, 0, "No pam for user %s", uinfo->name);
 }
 
 void get_user_by_id(userinfo_t *uinfo, uid_t uid) {
@@ -134,7 +134,8 @@ int main(int argc, char **argv) {
 		return 0;
 	}
 
-	get_user(&user, oldvt, owner);
+	if (get_user_systemd(&user, oldvt) == -1 && get_user_utmp(&user, oldvt) == -1)
+		get_user_by_id(&user, owner);
 	get_user_by_id(&root, 0);
 	if (strcmp(user.name, root.name) != 0)
 		root_user = 0;

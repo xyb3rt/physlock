@@ -1,4 +1,4 @@
-version = 12
+version = 12+
 
 srcdir = .
 VPATH = $(srcdir)
@@ -6,18 +6,17 @@ VPATH = $(srcdir)
 PREFIX = /usr/local
 MANPREFIX = $(PREFIX)/share/man
 
-# user detection mechanism: login/systemd/utmp
-SESSION = utmp
+# enable user detection using libsystemd
+HAVE_SYSTEMD = 1
 
 cflags = -Wall -pedantic $(CFLAGS)
 cppflags = -I. $(CPPFLAGS) -D_XOPEN_SOURCE=500
 
-lib_session_login =
-lib_session_systemd = -lsystemd
-lib_session_utmp =
-ldlibs = $(LDLIBS) -lpam -lpam_misc $(lib_session_$(SESSION))
+lib_systemd_0 =
+lib_systemd_1 = -lsystemd
+ldlibs = $(LDLIBS) -lpam -lpam_misc $(lib_systemd_$(HAVE_SYSTEMD))
 
-objs = main.o options.o session_$(SESSION).o util.o vt.o
+objs = main.o options.o session.o util.o vt.o
 
 all: physlock
 

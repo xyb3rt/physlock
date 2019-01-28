@@ -62,9 +62,10 @@ extern const options_t *options;
 void parse_options(int, char**);
 
 
-/* session_*.c */
+/* session.c */
 
-void get_user(userinfo_t*, int, uid_t);
+int get_user_systemd(userinfo_t*, int);
+int get_user_utmp(userinfo_t*, int);
 
 
 /* util.h */

@@ -5,16 +5,13 @@ physlock only allows the user of the active session (the user logged in on the
 foreground virtual terminal) and the root user to unlock the computer and uses
 PAM for authentication.
 
-physlock supports 3 mechanisms to detect the user of the active session:
+physlock uses 3 mechanisms to detect the user of the active session:
 
-1. *login*: Using the owner of the corresponding tty device file typically set
-   by login(1)
-2. *utmp*: Searching the utmp file for an entry whose `ut_line` field equals
-   the tty device name
-3. *systemd*: Querying systemd-logind(1)
-
-The used mechanism is selected at build time by setting the `SESSION` macro.
-The default is `utmp`.
+1. Querying systemd-logind(1) if not compiled with `HAVE_SYSTEMD=0`
+2. Searching the utmp file for an entry whose `ut_line` field equals the tty
+   device name
+3. Using the owner of the corresponding tty device file typically set by
+   login(1)
 
 Installation
 ------------
