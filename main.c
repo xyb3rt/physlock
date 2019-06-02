@@ -26,6 +26,7 @@
 #include <errno.h>
 #include <pwd.h>
 #include <signal.h>
+#include <sys/wait.h>
 #include <security/pam_misc.h>
 
 static int oldvt;
@@ -33,6 +34,7 @@ static vt_t vt;
 static int oldsysrq;
 static int oldprintk;
 static pid_t chpid;
+static int cmdpid;
 static int locked;
 static userinfo_t root, user;
 
@@ -67,8 +69,8 @@ CLEANUP void free_user(userinfo_t *uinfo) {
 }
 
 void cleanup() {
-	if (options->detach && chpid > 0)
-		/* No cleanup in parent after successful fork */
+	if ((options->detach && chpid > 0) || cmdpid == 0)
+		/* No cleanup in parent after successful fork or in failed forked command */
 		return;
 	free_user(&user);
 	free_user(&root);
@@ -98,9 +100,21 @@ void setup_signal(int signum, void (*handler)(int)) {
 	sigact.sa_flags = 0;
 	sigact.sa_handler = handler;
 	sigemptyset(&sigact.sa_mask);
-	
+
 	if (sigaction(signum, &sigact, NULL) < 0)
 		error(0, errno, "signal %d", signum);
+}
+
+void run_command(const char* cmd) {
+    cmdpid = fork();
+    if (cmdpid < 0) {
+        error(EXIT_FAILURE, errno, "fork");
+    } else if (cmdpid > 0) {
+        wait(NULL);
+    } else {
+        execlp("sh", "sh", "-c", cmd, NULL);
+        error(EXIT_FAILURE, errno, "exec");
+    }
 }
 
 int main(int argc, char **argv) {
@@ -109,6 +123,7 @@ int main(int argc, char **argv) {
 	userinfo_t *u = &user;
 
 	oldvt = oldsysrq = oldprintk = vt.nr = vt.fd = -1;
+	cmdpid = -1;
 	vt.ios = NULL;
 
 	error_init(2);
@@ -180,11 +195,15 @@ int main(int argc, char **argv) {
 	dup2(vt.fd, 1);
 	dup2(vt.fd, 2);
 
+	if (options->command_before != NULL && options->command_before[0] != '\0') {
+	    run_command(options->command_before);
+	}
+
 	if (options->prompt != NULL && options->prompt[0] != '\0') {
 		fprintf(vt.ios, "%s\n\n", options->prompt);
 	}
 
-	locked = 1;
+	locked = !options->no_auth;
 
 	while (locked) {
 		if (!root_user && try >= (u == &root ? 1 : 3)) {
@@ -216,6 +235,10 @@ int main(int argc, char **argv) {
 			sleep(5);
 			break;
 		}
+	}
+
+	if (options->command_after != NULL && options->command_after[0] != '\0') {
+	    run_command(options->command_after);
 	}
 
 	return 0;

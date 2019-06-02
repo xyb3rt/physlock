@@ -54,7 +54,10 @@ typedef struct options_s {
 	int disable_sysrq;
 	int lock_switch;
 	int mute_kernel_messages;
+	int no_auth;
 	const char *prompt;
+	const char *command_before;
+	const char *command_after;
 } options_t;
 
 extern const options_t *options;
