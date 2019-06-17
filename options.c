@@ -28,7 +28,7 @@ static options_t _options;
 const options_t *options = (const options_t*) &_options;
 
 void print_usage() {
-	printf("usage: physlock [-dhLlmsv] [-p MSG]\n");
+	printf("usage: physlock [-dhLlmsbanv] [-p MSG]\n");
 }
 
 void print_version() {
