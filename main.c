@@ -105,16 +105,32 @@ void setup_signal(int signum, void (*handler)(int)) {
 		error(0, errno, "signal %d", signum);
 }
 
-void run_command(const char* cmd) {
-    cmdpid = fork();
-    if (cmdpid < 0) {
-        error(EXIT_FAILURE, errno, "fork");
-    } else if (cmdpid > 0) {
-        wait(NULL);
-    } else {
-        execl("/bin/sh", "sh", "-c", cmd, NULL);
-        error(EXIT_FAILURE, errno, "exec");
-    }
+void drop_privileges(userinfo_t* user) {
+	struct passwd *p = getpwnam(user->name);
+	if (p == NULL) {
+		error(EXIT_FAILURE, errno, "get user passwd data");
+	}
+
+	if (setgid(p->pw_gid) != 0) {
+		error(EXIT_FAILURE, errno, "setgid");
+	}
+
+	if (setuid(p->pw_uid) != 0) {
+		error(EXIT_FAILURE, errno, "setuid");
+	}
+}
+
+void run_command(const char* cmd, userinfo_t* user) {
+	cmdpid = fork();
+	if (cmdpid < 0) {
+		error(EXIT_FAILURE, errno, "fork");
+	} else if (cmdpid > 0) {
+		wait(NULL);
+	} else {
+		drop_privileges(user);
+		execl("/bin/sh", "sh", "-c", cmd, NULL);
+		error(EXIT_FAILURE, errno, "exec");
+	}
 }
 
 int main(int argc, char **argv) {
@@ -196,7 +212,7 @@ int main(int argc, char **argv) {
 	dup2(vt.fd, 2);
 
 	if (options->command_before != NULL && options->command_before[0] != '\0') {
-	    run_command(options->command_before);
+		run_command(options->command_before, &user);
 	}
 
 	if (options->prompt != NULL && options->prompt[0] != '\0') {
@@ -238,7 +254,7 @@ int main(int argc, char **argv) {
 	}
 
 	if (options->command_after != NULL && options->command_after[0] != '\0') {
-	    run_command(options->command_after);
+		run_command(options->command_after, &user);
 	}
 
 	return 0;
