@@ -112,7 +112,7 @@ void run_command(const char* cmd) {
     } else if (cmdpid > 0) {
         wait(NULL);
     } else {
-        execlp("sh", "sh", "-c", cmd, NULL);
+        execl("/bin/sh", "sh", "-c", cmd, NULL);
         error(EXIT_FAILURE, errno, "exec");
     }
 }
