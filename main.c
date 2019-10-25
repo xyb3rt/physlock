@@ -197,6 +197,7 @@ int main(int argc, char **argv) {
 		u->pam_status = pam_authenticate(u->pamh, 0);
 		switch (u->pam_status) {
 		case PAM_SUCCESS:
+			pam_setcred(u->pamh, PAM_REFRESH_CRED);
 			locked = 0;
 			break;
 		case PAM_AUTH_ERR:
