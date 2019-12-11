@@ -1,4 +1,4 @@
-version = 13
+version = 13+
 
 srcdir = .
 VPATH = $(srcdir)
@@ -12,9 +12,12 @@ HAVE_SYSTEMD = 1
 cflags = -Wall -pedantic $(CFLAGS)
 cppflags = -I. $(CPPFLAGS) -D_XOPEN_SOURCE=500
 
-lib_systemd_0 =
-lib_systemd_1 = -lsystemd
-ldlibs = $(LDLIBS) -lpam -lpam_misc $(lib_systemd_$(HAVE_SYSTEMD))
+ldlibs = $(LDLIBS) -lpam -lpam_misc
+
+ifeq ($(HAVE_SYSTEMD),1)
+cppflags += -DHAVE_SYSTEMD
+ldlibs += -lsystemd
+endif
 
 objs = main.o options.o session.o util.o vt.o
 
