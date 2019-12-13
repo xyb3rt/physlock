@@ -11,7 +11,7 @@
 #if HAVE_SYSTEMD
 #include <systemd/sd-login.h>
 
-int get_user_systemd(userinfo_t *uinfo, int vt) {
+int get_user_logind(userinfo_t *uinfo, int vt) {
 	int ret = -1, i, n;
 	char **sessions = NULL;
 	unsigned int sess_vt;
@@ -40,7 +40,7 @@ int get_user_systemd(userinfo_t *uinfo, int vt) {
 
 #else
 
-int get_user_systemd(userinfo_t *uinfo, int vt) {
+int get_user_logind(userinfo_t *uinfo, int vt) {
 	(void)uinfo;
 	(void)vt;
 	return -1;

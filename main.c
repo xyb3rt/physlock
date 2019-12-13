@@ -134,7 +134,7 @@ int main(int argc, char **argv) {
 		return 0;
 	}
 
-	if (get_user_systemd(&user, oldvt) == -1 && get_user_utmp(&user, oldvt) == -1)
+	if (get_user_logind(&user, oldvt) == -1 && get_user_utmp(&user, oldvt) == -1)
 		get_user_by_id(&user, owner);
 	get_user_by_id(&root, 0);
 	if (strcmp(user.name, root.name) != 0)

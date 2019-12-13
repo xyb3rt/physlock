@@ -64,7 +64,7 @@ void parse_options(int, char**);
 
 /* session.c */
 
-int get_user_systemd(userinfo_t*, int);
+int get_user_logind(userinfo_t*, int);
 int get_user_utmp(userinfo_t*, int);
 
 
