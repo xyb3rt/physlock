@@ -10,6 +10,11 @@
 
 #if HAVE_SYSTEMD
 #include <systemd/sd-login.h>
+#elif HAVE_ELOGIND
+#include <elogind/sd-login.h>
+#endif
+
+#if HAVE_SYSTEMD || HAVE_ELOGIND
 
 int get_user_logind(userinfo_t *uinfo, int vt) {
 	int ret = -1, i, n;

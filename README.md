@@ -7,7 +7,8 @@ PAM for authentication.
 
 physlock uses 3 mechanisms to detect the user of the active session:
 
-1. Querying systemd-logind(1) if not compiled with `HAVE_SYSTEMD=0`
+1. Querying systemd-logind(1) or elogind(8) if compiled with either
+   `HAVE_SYSTEMD=1` or `HAVE_ELOGIND=1`
 2. Searching the utmp file for an entry whose `ut_line` field is the base name
    of the active tty device file
 3. Using the owner of the active tty device file typically set by login(1)
