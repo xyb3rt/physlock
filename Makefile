@@ -6,8 +6,9 @@ VPATH = $(srcdir)
 PREFIX = /usr/local
 MANPREFIX = $(PREFIX)/share/man
 
-# enable user detection using libsystemd
+# enable user detection using libsystemd or libelogind
 HAVE_SYSTEMD = 1
+HAVE_ELOGIND = 0
 
 cflags = -Wall -pedantic $(CFLAGS)
 cppflags = -I. $(CPPFLAGS) -D_XOPEN_SOURCE=500
@@ -15,6 +16,11 @@ cppflags = -I. $(CPPFLAGS) -D_XOPEN_SOURCE=500
 lib_systemd_0 =
 lib_systemd_1 = -lsystemd
 ldlibs = $(LDLIBS) -lpam -lpam_misc $(lib_systemd_$(HAVE_SYSTEMD))
+
+ifeq ($(HAVE_ELOGIND),1)
+  cppflags += -DHAVE_ELOGIND
+  ldlibs += -lelogind
+endif
 
 objs = main.o options.o session.o util.o vt.o
 
