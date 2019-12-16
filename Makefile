@@ -10,7 +10,8 @@ MANPREFIX = $(PREFIX)/share/man
 HAVE_SYSTEMD = 1
 
 cflags = -Wall -pedantic $(CFLAGS)
-cppflags = -I. $(CPPFLAGS) -D_XOPEN_SOURCE=500
+cppflags = -I. $(CPPFLAGS) -D_XOPEN_SOURCE=500 \
+  -DHAVE_SYSTEMD=$(HAVE_SYSTEMD)
 
 lib_systemd_0 =
 lib_systemd_1 = -lsystemd
