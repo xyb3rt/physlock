@@ -158,6 +158,7 @@ int main(int argc, char **argv) {
 				exit(EXIT_FAILURE);
 	}
 
+	vt_lock_switch(0);
 	vt_acquire(&vt);
 	vt_lock_switch(1);
 
