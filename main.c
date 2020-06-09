@@ -107,6 +107,8 @@ int main(int argc, char **argv) {
 	int try = 0, root_user = 1;
 	uid_t owner;
 	userinfo_t *u = &user;
+	int sigusr1recieved = 0;
+	sigset_t sigusr1;
 
 	oldvt = oldsysrq = oldprintk = vt.nr = vt.fd = -1;
 	vt.ios = NULL;
@@ -121,8 +123,13 @@ int main(int argc, char **argv) {
 	setup_signal(SIGQUIT, sa_handler_exit);
 	setup_signal(SIGHUP, SIG_IGN);
 	setup_signal(SIGINT, SIG_IGN);
-	setup_signal(SIGUSR1, SIG_IGN);
+	if (options->staggered != 1) {
+		setup_signal(SIGUSR1, SIG_IGN);
+	}
 	setup_signal(SIGUSR2, SIG_IGN);
+
+	sigemptyset(&sigusr1);
+	sigaddset(&sigusr1, SIGUSR1);
 
 	vt_init();
 	vt_get_current(&oldvt, &owner);
@@ -185,6 +192,13 @@ int main(int argc, char **argv) {
 	}
 
 	locked = 1;
+
+	if (options->staggered == 1) {
+		sigprocmask(SIG_BLOCK,&sigusr1,NULL);
+		sigwait(&sigusr1, &sigusr1recieved);
+		sigprocmask(SIG_UNBLOCK,&sigusr1,NULL);
+		fflush(vt.ios);
+	}
 
 	while (locked) {
 		if (!root_user && try >= (u == &root ? 1 : 3)) {
