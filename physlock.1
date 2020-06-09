@@ -49,6 +49,14 @@ Disable SysRq mechanism while physlock is running.
 .TP
 .B \-v
 Print version information to standard output and exit.
+.TP
+.B \-w
+Wait until a SIGUSR1 signal is received to prompt for authentication.
+Useful if the first authentication attempt always fails
+due to bad input buffering in the virtual terminal.
+.BI WARNING:
+When using this option, ensure that some external program sends a SIGUSR1
+signal to physlock. Otherwise, you will be locked out of your session.
 .SH AUTHORS
 .TP
 Bert Muennich <ber.t at gmx.com>
