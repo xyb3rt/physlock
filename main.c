@@ -27,6 +27,7 @@
 #include <pwd.h>
 #include <signal.h>
 #include <security/pam_misc.h>
+#include <security/pam_modules.h>
 
 static int oldvt;
 static vt_t vt;
@@ -175,6 +176,12 @@ int main(int argc, char **argv) {
 		}
 	}
 	vt_secure(&vt);
+
+	/* Attempt to set PAM_TTY to the current VT, fixes #110 */
+	u->pam_status = pam_set_item(u->pamh, PAM_TTY, vt.vt_name);
+	if (u->pam_status != PAM_SUCCESS) {
+		error(EXIT_FAILURE, 0, "Unable to set PAM_TTY: %s", pam_strerror(u->pamh, u->pam_status));
+	}
 
 	dup2(vt.fd, 0);
 	dup2(vt.fd, 1);

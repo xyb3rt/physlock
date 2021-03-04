@@ -79,6 +79,7 @@ void vt_acquire(vt_t *vt) {
 	vt->nr = -1;
 	vt->ios = NULL;
 	vt->fd = -1;
+	vt->vt_name = NULL;
 
 	while ((ret = ioctl(fd, VT_OPENQRY, &vt->nr)) == -1 && errno == EINTR);
 	if (ret == -1)
@@ -89,6 +90,7 @@ void vt_acquire(vt_t *vt) {
 	if (vt->ios == NULL)
 		error(EXIT_FAILURE, errno, "%s", filename);
 	vt->fd = fileno(vt->ios);
+	vt->vt_name = estrdup(filename);
 
 	while ((ret = ioctl(fd, VT_ACTIVATE, vt->nr)) == -1 && errno == EINTR);
 	if (ret == -1)
@@ -138,6 +140,10 @@ CLEANUP int vt_release(vt_t *vt, int nr) {
 			return -1;
 		}
 		vt->nr = -1;
+	}
+
+	if (vt->vt_name != NULL) {
+		free(vt->vt_name);
 	}
 	return 0;
 }
