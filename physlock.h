@@ -85,6 +85,7 @@ typedef struct vt_s {
 	int nr;
 	FILE *ios;
 	int fd;
+	char *vt_name;
 	struct termios term;
 	struct termios term_orig;
 } vt_t;
