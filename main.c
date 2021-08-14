@@ -98,7 +98,7 @@ void setup_signal(int signum, void (*handler)(int)) {
 	sigact.sa_flags = 0;
 	sigact.sa_handler = handler;
 	sigemptyset(&sigact.sa_mask);
-	
+
 	if (sigaction(signum, &sigact, NULL) < 0)
 		error(0, errno, "signal %d", signum);
 }
@@ -220,4 +220,3 @@ int main(int argc, char **argv) {
 
 	return 0;
 }
-

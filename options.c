@@ -37,7 +37,7 @@ void print_version() {
 
 void parse_options(int argc, char **argv) {
 	int opt;
-	
+
 	progname = strrchr(argv[0], '/');
 	progname = progname != NULL ? progname + 1 : argv[0];
 
@@ -78,4 +78,3 @@ void parse_options(int argc, char **argv) {
 		}
 	}
 }
-

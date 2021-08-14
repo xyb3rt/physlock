@@ -80,4 +80,3 @@ int get_user_utmp(userinfo_t *uinfo, int vt) {
 	}
 	return ret;
 }
-

@@ -7,6 +7,5 @@ static const char * const TTY_DEVICE_BASE = "/dev/tty";
 /* full path to kernel sysrq control file:             */
 static const char * const SYSRQ_PATH = "/proc/sys/kernel/sysrq";
 
-/* full path to kernel printk file:			*/
+/* full path to kernel printk file:                    */
 static const char * const PRINTK_PATH = "/proc/sys/kernel/printk";
-
