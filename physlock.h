@@ -100,4 +100,3 @@ void vt_secure(vt_t*);
 CLEANUP void vt_reset(vt_t*);
 
 #endif /* PHYSLOCK_H */
-

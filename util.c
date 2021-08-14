@@ -138,4 +138,3 @@ CLEANUP ssize_t write_int_to_file(const char *path, int value) {
 	snprintf(buf, sizeof(buf), "%d\n", value);
 	return write_file(path, buf, strlen(buf));
 }
-
